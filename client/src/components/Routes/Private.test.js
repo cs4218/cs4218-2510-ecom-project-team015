@@ -60,4 +60,23 @@ describe('Given a req to access PrivateRoute', () => {
         const protectedContent = await screen.findByText("Protected content");
         expect(protectedContent).toBeInTheDocument();
     });
+
+    test('Renders spinner when no response received from backend', async () => {
+        //Spy on the console for the 'backend down' error
+        const spyConsoleLog = jest.spyOn(console, "error").mockImplementation(() => {});
+
+        // Frontend verifies token and user 
+        useAuth.mockReturnValue([{token: 'valid-token', user: 'someRandomUser'}, jest.fn()]);
+        // Simulate creating an error object and mock this
+        const error = new Error("Backend down")
+        axios.get.mockRejectedValue(error);
+        render(
+            <PrivateRoute />
+        );
+        const spinner = await screen.findByText("Spinner loading");
+        expect(spinner).toBeInTheDocument();
+
+        // assert that the error log is displayed and matches
+        expect(spyConsoleLog).toHaveBeenCalledWith("Authentication check from backend failed: ", error.message);
+    })
 });
