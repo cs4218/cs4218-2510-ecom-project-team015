@@ -62,7 +62,7 @@ describe("Admin Dashboard Component", () => {
 		useAuth.mockReturnValue([{ user: { name: "Test Admin", email: "test@admin.com" } }, jest.fn()]);
 		render(<AdminDashboard />);
 		expect(screen.getByText(/admin name\s*:\s*test admin/i)).toBeInTheDocument();
-		expect(screen.getByText(/admin email\s*:\s*bob@admin\.com/i)).toBeInTheDocument();
+		expect(screen.getByText(/admin email\s*:\s*test@admin\.com/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin contact\s*:/i)).toBeInTheDocument();
 		expect(screen.queryByText(/\d/)).toBeNull();
 	});

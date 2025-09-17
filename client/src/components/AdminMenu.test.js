@@ -3,9 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, NavLink } from "react-router-dom";
 import AdminMenu from "./AdminMenu";
 
-// I have set this up so that we don't have to duplicate the render
-// logic in every test. Each test will simply call setup(), with an
-// optional subPath to simulate a specific admin route.
+// Helper function to render AdminMenu within a MemoryRouter
 const setup = (subPath = "") => {
 	const base = "/dashboard/admin";
 	render(
@@ -57,12 +55,9 @@ describe("Admin Menu Component", () => {
 		expect(screen.getByRole("link", { name: /orders/i })).not.toHaveClass("active");
 	});
 
-	// This is to check the active link styling when a user clicks on
-	// one of the button in the Admin Panel. We will use MemoryRouter's
-	// initialEntries to pretend the user is on a given route.
-	// The active link should have both the 'active' class
-	// and aria-current="page" for accessibility.
-	// All other links should not be marked active.
+	// We will use a data-driven approach to test the active link logic
+	// for each of the admin routes. This avoids duplicating similar test
+	// logic for each route.
 	describe("Active Link", () => {
 		const links = [
 			{
@@ -87,8 +82,7 @@ describe("Admin Menu Component", () => {
 			},
 		];
 
-		// we will loop through all the links, and check both the
-		// active and inactive
+        // iterate through each link scenario
 		it.each(links)(
 			"applies active class only to the matching route -> %s",
 			({ path, active, inactive }) => {

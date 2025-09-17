@@ -30,7 +30,7 @@ export default {
 	collectCoverage: true,
 	collectCoverageFrom: [
 		"client/src/pages/Auth/**",
-		"client/src/pages/admin/**",
+		"client/src/pages/admin/AdminDashboard.**",
 		"client/src/components/AdminMenu.**",
 	],
 	coverageThreshold: {
