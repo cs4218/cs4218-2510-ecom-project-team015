@@ -63,7 +63,7 @@ describe("Admin Menu Component", () => {
 	// The active link should have both the 'active' class
 	// and aria-current="page" for accessibility.
 	// All other links should not be marked active.
-	describe("Admin Panel active link styling", () => {
+	describe("Active Link", () => {
 		const links = [
 			{
 				path: "/create-category",
