@@ -3,6 +3,10 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SearchProvider, useSearch } from "./search";
 
+//! Created with the help of AI
+
+/*This Probe's object is to test after clicking update button, 
+keyword's value turns to phone and result's value turns to an array*/
 function Probe() {
 	const [auth, setAuth] = useSearch();
 	return (
@@ -20,7 +24,7 @@ function Probe() {
 }
 
 describe("SearchProvider", () => {
-	test("có giá trị mặc định", () => {
+	test("Default value of state", () => {
 		render(
 			<SearchProvider>
 				<Probe />
@@ -30,7 +34,7 @@ describe("SearchProvider", () => {
 		expect(screen.getByTestId("results").textContent).toBe("0");
 	});
 
-	test("update state được", () => {
+	test("State is successfully updated, length is 3", () => {
 		render(
 			<SearchProvider>
 				<Probe />
@@ -43,13 +47,12 @@ describe("SearchProvider", () => {
 });
 
 describe("useSearch", () => {
-	test("ném lỗi khi dùng ngoài Provider", () => {
+	test("Throw an exception when using useSearch() outside of SearchProvider", () => {
 		const Broken = () => {
 			const [auth] = useSearch();
 			return <div>{auth.keyword}</div>;
 		};
 
-		// (tùy chọn) mute console.error cho đỡ ồn
 		const spy = jest.spyOn(console, "error").mockImplementation(() => {});
 		expect(() => render(<Broken />)).toThrow(/within SearchProvider/i);
 		spy.mockRestore();
