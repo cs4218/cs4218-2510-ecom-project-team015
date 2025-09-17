@@ -1,7 +1,6 @@
 import { requireSignIn, isAdmin } from "./authMiddleware.js";
 import JWT from "jsonwebtoken";
-import userModel from "../models/userModel.js"; 
-import { de } from "date-fns/locale";
+import userModel from "../models/userModel.js";
 
 // Mock dpendencies
 jest.mock("jsonwebtoken");

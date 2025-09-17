@@ -16,6 +16,29 @@ describe(' Auth Helper Functions', () => {
             // Check that the hashed password is a valid
             expect(hashedPassword).toMatch(/^\$2[ayb]\$.{56}$/);
         });
+
+        it('should handle errors when hashing fails', async () => {
+            // Mock bcrypt.hash to throw an error
+            jest.spyOn(bcrypt, 'hash').mockImplementation(() => {
+                throw new Error('Hashing failed');
+            });
+
+            // Spy on the console.log to capture the error message
+            const consoleMessage = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+            const password = "Test@1234";
+            const hashedPassword = await hashPassword(password);
+
+            // Check that the error was logged
+            expect(consoleMessage).toHaveBeenCalledWith(new Error('Hashing failed'));
+
+            // Check that the hashed password is undefined due to the error
+            expect(hashedPassword).toBeUndefined();
+
+            // Restore the original bcrypt.hash implementation
+            bcrypt.hash.mockRestore();
+            consoleMessage.mockRestore();
+        });
     });
 
     describe('comparePassword', () => {
