@@ -2,9 +2,9 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import toast from 'react-hot-toast';
-import Register from './Register';
+import Register from './Register.js';
 
 // Mocking axios.post
 jest.mock('axios');
@@ -21,8 +21,6 @@ jest.mock('../../context/auth', () => ({
 jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
   }));  
-
-  jest.mock("../../hooks/useCategory", () => jest.fn(() => [])); // Mock useCategory hook to return empty array
 
 //   Object.defineProperty(window, 'localStorage', {
 //     value: {
