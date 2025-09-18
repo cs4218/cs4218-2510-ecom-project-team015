@@ -20,7 +20,9 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/pages/Auth/*.test.js", "<rootDir>/client/src/components/Routes/*.test.js", "<rootDir>/client/src/components/*.test.js", "<rootDir>/client/src/pages/user/*.test.js"],
+
+  testMatch: ["<rootDir>/client/src/**/*.test.js"],
+
 
   // jest code coverage
   collectCoverage: true,
