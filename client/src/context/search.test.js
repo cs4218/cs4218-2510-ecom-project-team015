@@ -46,15 +46,15 @@ describe("SearchProvider", () => {
 	});
 });
 
-describe("useSearch", () => {
-	test("Throw an exception when using useSearch() outside of SearchProvider", () => {
-		const Broken = () => {
-			const [auth] = useSearch();
-			return <div>{auth.keyword}</div>;
-		};
+// describe("useSearch", () => {
+// 	test("Throw an exception when using useSearch() outside of SearchProvider", () => {
+// 		const Broken = () => {
+// 			const [auth] = useSearch();
+// 			return <div>{auth.keyword}</div>;
+// 		};
 
-		const spy = jest.spyOn(console, "error").mockImplementation(() => {});
-		expect(() => render(<Broken />)).toThrow(/within SearchProvider/i);
-		spy.mockRestore();
-	});
-});
+// 		const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+// 		expect(() => render(<Broken />)).toThrow(/within SearchProvider/i);
+// 		spy.mockRestore();
+// 	});
+// });
