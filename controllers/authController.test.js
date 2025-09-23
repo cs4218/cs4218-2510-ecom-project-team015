@@ -1,11 +1,15 @@
-import { registerController } from "../controllers/authController.js";
+import { registerController, loginController, forgotPasswordController, testController } from "../controllers/authController.js";
+import { updateProfileController, getOrdersController, getAllOrdersController, orderStatusController } from "../controllers/authController.js";
 import userModel from "../models/userModel.js";
 import { hashPassword, comparePassword } from "../helpers/authHelper.js";
+import JWT from "jsonwebtoken";
 
 // Mock the database model and helper functions
 jest.mock("../models/userModel.js");
 jest.mock("../helpers/authHelper.js");
+jest.mock("jsonwebtoken");
 
+// Test cases for Registration controller
 describe("registerController", () => {
     let req, res;
 
@@ -117,3 +121,149 @@ describe("registerController", () => {
         }));
     });
 });
+
+
+// Test cases for Login controller
+describe("loginController", () => {
+    let req, res;
+
+    // Mock req, res and reset them before each test case
+    beforeEach(() => {
+        req = { body: {} };
+        res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+        jest.clearAllMocks();
+    });
+
+    it("should return error if email is missing", async () => {
+        // The request body is empty to simulate missing email
+        await loginController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid email or password" });
+    });
+
+    it("should return error if password is missing", async () => {
+        // The request body has email but missing password
+        req.body = { email: "test@gmail.com" };
+
+        await loginController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid email or password" });
+    });
+
+    it("should return error if user does not exist", async () => {
+        // The request body has wrong email and password
+        req.body = { email: "test@gmail.com", password: "password1234" };
+
+        // Mock the userModel.findOne method to return null
+        userModel.findOne.mockResolvedValue(null);
+
+        await loginController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is not registerd" });
+    });
+
+    it("should return error if password does not match", async () => {
+        // The request body has corect email and wrong password
+        req.body = { email: "test@gmail.com", password: "password1234" };
+
+        // Mock the userModel.findOne method to return a user
+        userModel.findOne.mockResolvedValue({ email: "test@gmail.com", password: "hashedPassword" });
+        
+        // Mock the comparePassword method to return false
+        comparePassword.mockResolvedValue(false);
+
+        await loginController(req, res);    
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Invalid Password" });
+    });
+
+    it("should login user successfully when the credentials are valid", async () => {
+        // The request body has correct email and password
+        req.body = { email: "test@gmail.com", password: "password1234" };
+
+        // Mock the userModel.findOne method to return a user
+        const fakeUser = { _id: "fakeUserId", name: "Test User", email: "test@gmail.com", password: "hashedPassword", phone: "12345678", address: "123 Test Street", role: "0" };
+        userModel.findOne.mockResolvedValue(fakeUser);
+
+        // Mock the comparePassword method to return true
+        comparePassword.mockResolvedValue(true);
+
+        // Mock JWT sign method to return a fake token and make sure it's called with correct parameters
+        JWT.sign.mockReturnValue("fakeToken");
+
+        await loginController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            message: "Login Successful",
+            user: {
+                _id: fakeUser._id,
+                name: fakeUser.name,
+                email: fakeUser.email,  
+                phone: fakeUser.phone,                
+                address: fakeUser.address,
+                role: fakeUser.role,
+            },
+            token: "fakeToken",
+        });
+    });
+
+    it("should catch the database errors during login", async () => {
+        // The request body has correct email and password
+        req.body = { email: "test@gmail.com", password: "password1234" };
+
+        // Mock the userModel.findOne method to return a database error
+        userModel.findOne.mockRejectedValue(new Error("Database error"));
+
+        await loginController(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+            success: false,
+            message: "Error in login",
+            error: new Error("Database error"),
+        }));
+    });
+    
+    it("should catch errors during token generation", async () => {
+        // The request body has correct email and password
+        req.body = { email: "test@gmail.com", password: "password1234" };
+
+        // Mock the userModel.findOne method to return a user
+        const fakeUser = { _id: "fakeUserId", name: "Test User", email: "test@gmail.com", password: "hashedPassword", phone: "12345678", address: "123 Test Street", role: "0" };
+        userModel.findOne.mockResolvedValue(fakeUser);
+
+        // Mock the comparePassword method to return true
+        comparePassword.mockResolvedValue(true);
+
+        // Mock JWT sign method to throw an error
+        JWT.sign.mockImplementation(() => {
+            throw new Error("Token generation error");
+        });
+
+        await loginController(req, res);
+        
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+            success: false,
+            message: "Error in login",
+            error: expect.objectContaining({ message: "Token generation error" }),
+        }));
+    });
+});
+
+// Test cases for Forgot Password controller
+// Test cases for Test controller
+// Test cases for Update Profile controller
+// Test cases for Get Orders controller
+// Test cases for Get All Orders controller
+// Test cases for Order Status controller
