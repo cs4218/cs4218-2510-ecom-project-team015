@@ -30,5 +30,8 @@ jobs:
             npm install
             cd ..
 
-      - name: Run Jest tests
+      - name: Run Frontend tests
         run: npm run test:frontend
+
+      - name: Run backend tests
+        run: npm run test:backend
