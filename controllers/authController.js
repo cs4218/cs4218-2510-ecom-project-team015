@@ -83,18 +83,18 @@ export const loginController = async (req, res) => {
     }
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(200).send({
+      return res.status(401).send({
         success: false,
         message: "Invalid Password",
       });
     }
     //token
-    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     res.status(200).send({
       success: true,
-      message: "login successfully",
+      message: "Login Successful",
       user: {
         _id: user._id,
         name: user.name,
@@ -171,7 +171,11 @@ export const updateProfileController = async (req, res) => {
     const user = await userModel.findById(req.user._id);
     //password
     if (password && password.length < 6) {
-      return res.json({ error: "Passsword is required and 6 character long" });
+      // console.log("Password is required and 6 character long");
+      return res.status(400).send({
+        success: false,
+        message: "Password is required and 6 character long",
+      });
     }
     const hashedPassword = password ? await hashPassword(password) : undefined;
     const updatedUser = await userModel.findByIdAndUpdate(
