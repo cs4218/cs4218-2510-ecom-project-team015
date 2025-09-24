@@ -36,21 +36,22 @@ export default {
 	// jest code coverage
 	collectCoverage: true,
 	collectCoverageFrom: [
-		"client/src/pages/Auth/**", 
-		"client/src/pages/admin/AdminDashboard.test.js",
-		"client/src/pages/user/Dashboard.test.js",
-		"client/src/pages/About.test.js",
-		"client/src/pages/Pagenotfound.test.js", 
-		"client/src/context/auth.test.js",
-		"client/src/components/Routes/Private.test.js",
-		"client/src/components/AdminMenu.test.js",
-		"client/src/components/Footer.test.js",
-		"client/src/components/Header.test.js",
-		"client/src/components/Layout.test.js",
-		"client/src/components/Spinner.test.js",
-		"client/src/components/UserMenu.test.js",
-		// "client/src/pages/Search.test.js",	--- Need to fix this test case ---
-		// "client/src/context/search.test.js",	--- Need to fix this test case ---
+		"client/src/pages/Auth/**",
+		"client/src/pages/admin/AdminDashboard.js",
+		"client/src/pages/admin/Products.js",
+		"client/src/pages/user/Dashboard.js",
+		"client/src/pages/About.js",
+		"client/src/pages/Pagenotfound.js",
+		"client/src/context/auth.js",
+		"client/src/components/Routes/Private.js",
+		"client/src/components/AdminMenu.js",
+		"client/src/components/Footer.js",
+		"client/src/components/Header.js",
+		"client/src/components/Layout.js",
+		"client/src/components/Spinner.js",
+		"client/src/components/UserMenu.js",
+		// "client/src/pages/Search.js",	--- Need to fix this test case ---
+		// "client/src/context/search.js",	--- Need to fix this test case ---
 	],
 	coverageThreshold: {
 		global: {
