@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: function (value) {
-          const now = new Date().toISOString().split("T")[0]; //Get just the date without time
+          const now = new Date() //Get just the date without time
           const ageInMs = now - value;
           const ageInDays = ageInMs / (1000 * 60 * 60 * 24);
           const ageInYrs = ageInDays/365.25;
