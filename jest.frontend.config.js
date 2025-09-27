@@ -38,7 +38,10 @@ export default {
 	collectCoverageFrom: [
 		"client/src/pages/Auth/**",
 		"client/src/pages/admin/AdminDashboard.js",
+		"client/src/pages/admin/AdminOrders.js",
 		"client/src/pages/admin/Products.js",
+		"client/src/pages/admin/CreateProduct.js",
+		"client/src/pages/admin/UpdateProduct.js",
 		"client/src/pages/user/Dashboard.js",
 		"client/src/pages/About.js",
 		"client/src/pages/Pagenotfound.js",

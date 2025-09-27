@@ -6,13 +6,11 @@ jest.mock("../../context/auth", () => ({
 	useAuth: jest.fn(),
 }));
 
-// Layout mock
 jest.mock("../../components/Layout", () => ({
 	__esModule: true,
 	default: ({ children }) => <div data-testid="mock-layout">{children}</div>,
 }));
 
-// AdminMenu mock
 jest.mock("../../components/AdminMenu", () => ({
 	__esModule: true,
 	default: () => <div data-testid="mock-admin-menu">AdminMenu</div>,
