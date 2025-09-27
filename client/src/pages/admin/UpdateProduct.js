@@ -100,7 +100,8 @@ const UpdateProduct = () => {
 		}
 	};
 	return (
-		<Layout title={"Dashboard - Create Product"}>
+		// Bug fix: Corrected the title prop to "Dashboard - Update Product"
+		<Layout title={"Dashboard - Update Product"}>
 			<div className="container-fluid m-3 p-3">
 				<div className="row">
 					<div className="col-md-3">
@@ -197,6 +198,7 @@ const UpdateProduct = () => {
 								/>
 							</div>
 							<div className="mb-3">
+								{/* Bug Fix: Fixed shipping value comparison */}
 								<Select
 									bordered={false}
 									placeholder="Select Shipping "
@@ -206,7 +208,7 @@ const UpdateProduct = () => {
 									onChange={(value) => {
 										setShipping(value);
 									}}
-									value={shipping ? "yes" : "No"}
+									value={shipping === "1" ? "Yes" : "No"}
 								>
 									<Option value="0">No</Option>
 									<Option value="1">Yes</Option>

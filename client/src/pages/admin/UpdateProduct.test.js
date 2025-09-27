@@ -22,9 +22,13 @@ jest.mock("react-hot-toast", () => ({
 	},
 }));
 
-jest.mock("../../components/Layout", () => ({
+jest.mock("./../../components/Layout", () => ({
 	__esModule: true,
-	default: ({ children }) => <div data-testid="mock-layout">{children}</div>,
+	default: ({ title, children }) => (
+		<div data-testid="mock-layout" data-title={title}>
+			{children}
+		</div>
+	),
 }));
 
 jest.mock("../../components/AdminMenu", () => ({
@@ -37,11 +41,13 @@ jest.mock("antd", () => {
 	const React = require("react");
 	const Select = ({ children, value, onChange, placeholder, className, ...rest }) => {
 		const testId = rest["data-testid"] ?? `antd-select-${(placeholder || "select").trim()}`;
+		const normalized = value === "yes" ? "1" : value === "No" ? "0" : value;
+
 		return (
 			<select
 				data-testid={testId}
 				className={className}
-				value={value ?? ""}
+				value={normalized !== undefined ? normalized : undefined}
 				onChange={(e) => onChange && onChange(e.target.value)}
 			>
 				{children}
@@ -91,12 +97,9 @@ function arrangeDefaultAxios() {
 let consoleSpy;
 
 beforeEach(() => {
-	consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-});
-
-beforeEach(() => {
 	jest.clearAllMocks();
 	arrangeDefaultAxios();
+	consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 	window.prompt = originalPrompt;
 });
 
@@ -105,10 +108,13 @@ afterEach(() => {
 });
 
 describe("UpdateProduct Component", () => {
-	it("renders Layout and AdminMenu", async () => {
+	it("renders Layout, AdminMenu, page heading and passes the correct Layout title", async () => {
 		render(<UpdateProduct />);
-		expect(screen.getByTestId("mock-layout")).toBeInTheDocument();
+		const layout = screen.getByTestId("mock-layout");
+		expect(layout).toBeInTheDocument();
 		expect(screen.getByTestId("mock-admin-menu")).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: /update product/i, level: 1 })).toBeInTheDocument();
+		expect(layout).toHaveAttribute("data-title", "Dashboard - Update Product");
 	});
 
 	it("loads product and category and pre-fills the form", async () => {

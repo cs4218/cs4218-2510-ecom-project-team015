@@ -9,9 +9,13 @@ jest.mock("axios");
 
 jest.mock("../../context/auth");
 
-jest.mock("../../components/Layout", () => ({
+jest.mock("./../../components/Layout", () => ({
 	__esModule: true,
-	default: ({ children }) => <div data-testid="mock-layout">{children}</div>,
+	default: ({ title, children }) => (
+		<div data-testid="mock-layout" data-title={title}>
+			{children}
+		</div>
+	),
 }));
 
 jest.mock("../../components/AdminMenu", () => ({
@@ -43,19 +47,15 @@ beforeEach(() => {
 });
 
 describe("Admin Orders component", () => {
-	it("renders the All Orders heading", () => {
+	it("renders Layout, AdminMenu, page heading and passes the correct Layout title", () => {
 		useAuth.mockReturnValue([{ token: "abcd12345" }, jest.fn()]);
 		axios.get.mockResolvedValue({ data: [] });
 		render(<AdminOrders />);
-		expect(screen.getByRole("heading", { name: /all orders/i })).toBeInTheDocument();
-	});
-
-	it("renders Layout and AdminMenu component", () => {
-		useAuth.mockReturnValue([{ token: "abcd12345" }, jest.fn()]);
-		axios.get.mockResolvedValue({ data: [] });
-		render(<AdminOrders />);
-		expect(screen.getByTestId("mock-layout")).toBeInTheDocument();
+		const layout = screen.getByTestId("mock-layout");
+		expect(layout).toBeInTheDocument();
+		expect(layout).toHaveAttribute("data-title", "All Orders Data");
 		expect(screen.getByTestId("mock-admin-menu")).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: /all orders/i, level: 1 })).toBeInTheDocument();
 	});
 
 	it("calls GET when token exists", async () => {
@@ -189,8 +189,6 @@ describe("Admin Orders component", () => {
 	});
 
 	// Created Using ChatGPT
-	// Tests error handling paths to ensure no crashes occur
-	// when the API calls fail.
 	it("swallows errors on PUT without crashing", async () => {
 		useAuth.mockReturnValue([{ token: "abc123" }, jest.fn()]);
 		axios.get.mockResolvedValue({
