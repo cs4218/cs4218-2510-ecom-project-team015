@@ -28,6 +28,7 @@ export default {
 		"<rootDir>/client/src/pages/Pagenotfound.test.js",
 		"<rootDir>/client/src/context/auth.test.js",
 		"<rootDir>/client/src/components/Routes/*.test.js",
+		"<rootDir>/client/src/components/Form/*.test.js",
 		"<rootDir>/client/src/components/*.test.js",
 		// "<rootDir>/client/src/pages/Search.test.js", --- Need to fix this test case ---
 		// "<rootDir>/client/src/context/search.test.js", --- Need to fix this test case ---
@@ -37,11 +38,8 @@ export default {
 	collectCoverage: true,
 	collectCoverageFrom: [
 		"client/src/pages/Auth/**",
-		"client/src/pages/admin/AdminDashboard.js",
-		"client/src/pages/admin/AdminOrders.js",
-		"client/src/pages/admin/Products.js",
-		"client/src/pages/admin/CreateProduct.js",
-		"client/src/pages/admin/UpdateProduct.js",
+		"client/src/pages/admin/*.js",
+		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
 		"client/src/pages/user/Dashboard.js",
 		"client/src/pages/About.js",
 		"client/src/pages/Pagenotfound.js",
@@ -53,6 +51,7 @@ export default {
 		"client/src/components/Layout.js",
 		"client/src/components/Spinner.js",
 		"client/src/components/UserMenu.js",
+		"client/src/components/Form/CategoryForm.js",
 		// "client/src/pages/Search.js",	--- Need to fix this test case ---
 		// "client/src/context/search.js",	--- Need to fix this test case ---
 	],
