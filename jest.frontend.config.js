@@ -34,6 +34,7 @@ export default {
 		"<rootDir>/client/src/context/search.test.js",
 		"<rootDir>/client/src/pages/ProductDetails.test.js",
 		"<rootDir>/client/src/pages/CategoryProduct.test.js",
+
 	],
 
 	// jest code coverage
