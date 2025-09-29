@@ -29,8 +29,12 @@ export default {
 		"<rootDir>/client/src/context/auth.test.js",
 		"<rootDir>/client/src/components/Routes/*.test.js",
 		"<rootDir>/client/src/components/*.test.js",
-		// "<rootDir>/client/src/pages/Search.test.js", --- Need to fix this test case ---
-		// "<rootDir>/client/src/context/search.test.js", --- Need to fix this test case ---
+		"<rootDir>/client/src/components/Form/*.test.js",
+		"<rootDir>/client/src/pages/Search.test.js",
+		"<rootDir>/client/src/context/search.test.js",
+		"<rootDir>/client/src/pages/ProductDetails.test.js",
+		"<rootDir>/client/src/pages/CategoryProduct.test.js",
+
 	],
 
 	// jest code coverage
@@ -53,8 +57,11 @@ export default {
 		"client/src/components/Layout.js",
 		"client/src/components/Spinner.js",
 		"client/src/components/UserMenu.js",
-		// "client/src/pages/Search.js",	--- Need to fix this test case ---
-		// "client/src/context/search.js",	--- Need to fix this test case ---
+		"client/src/pages/Search.js",
+		"client/src/context/search.js",
+		"client/src/components/Form/**",
+		"client/src/pages/ProductDetails.js",
+		"client/src/pages/CategoryProduct.js",
 	],
 	coverageThreshold: {
 		global: {

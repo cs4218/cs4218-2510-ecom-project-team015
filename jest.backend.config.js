@@ -9,6 +9,8 @@ export default {
   testMatch: [
     "<rootDir>/helpers/*.test.js",
     "<rootDir>/middlewares/*.test.js",
+    "<rootDir>/config/*.test.js",
+    "<rootDir>/models/*.test.js",
     // "<rootDir>/controllers/*.test.js"
   ],
 
@@ -17,7 +19,8 @@ export default {
   collectCoverageFrom: [
     "helpers/**", 
     "middlewares/**",
-    // "controllers/**"
+    // "controllers/**",
+    "models/**",
   ],
   coverageThreshold: {
     global: {
