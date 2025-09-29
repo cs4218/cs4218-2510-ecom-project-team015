@@ -3,6 +3,8 @@ import orderModel from "../models/orderModel.js";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
+import { error } from "console";
+import validator from "validator";
 
 export const registerController = async (req, res) => {
   try {
@@ -164,15 +166,28 @@ export const testController = (req, res) => {
   }
 };
 
-//update prfole
+//update profile
 export const updateProfileController = async (req, res) => {
   try {
-    const { name, email, password, address, phone } = req.body;
+    const { name, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
+    
+    //handle name
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(name)) {
+      throw new Error("Name can contain only letters and spaces!");
+    }
+
     //password
     if (password && password.length < 6) {
-      return res.json({ error: "Passsword is required and 6 character long" });
+      throw new Error("Password has to be longer than 6 characters!");
     }
+
+    if (!validator.isMobilePhone(phone, "en-SG")) {
+      throw new Error("Invalid Singapore phone number");
+    }
+
+
     const hashedPassword = password ? await hashPassword(password) : undefined;
     const updatedUser = await userModel.findByIdAndUpdate(
       req.user._id,
@@ -182,18 +197,20 @@ export const updateProfileController = async (req, res) => {
         phone: phone || user.phone,
         address: address || user.address,
       },
-      { new: true }
+      { new: true,
+        runValidators: true //including for last line of checks by model
+       }
     );
     res.status(200).send({
       success: true,
-      message: "Profile Updated SUccessfully",
+      message: "Profile Updated Successfully",
       updatedUser,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: error.message,
       error,
     });
   }
