@@ -174,7 +174,7 @@ export const updateProfileController = async (req, res) => {
     
     //handle name
     const nameRegex = /^[a-zA-Z\s]+$/;
-    if (!nameRegex.test(name)) {
+    if (name && !nameRegex.test(name)) {
       throw new Error("Name can contain only letters and spaces!");
     }
 
@@ -183,7 +183,7 @@ export const updateProfileController = async (req, res) => {
       throw new Error("Password has to be longer than 6 characters!");
     }
 
-    if (!validator.isMobilePhone(phone, "en-SG")) {
+    if (phone && !validator.isMobilePhone(phone, "en-SG")) {
       throw new Error("Invalid Singapore phone number");
     }
 
@@ -207,7 +207,6 @@ export const updateProfileController = async (req, res) => {
       updatedUser,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).send({
       success: false,
       message: error.message,
