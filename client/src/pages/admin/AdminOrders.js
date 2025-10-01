@@ -16,7 +16,9 @@ const AdminOrders = () => {
     "deliverd",
     "cancel",
   ]);
-  const [changeStatus, setCHangeStatus] = useState("");
+  // Bug Fix: Corrected typo from "chageStatus" to "changeStatus"
+  // and setCHangeStatus to setChangeStatus
+  const [changeStatus, setChangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
   const [auth, setAuth] = useAuth();
   const getOrders = async () => {
