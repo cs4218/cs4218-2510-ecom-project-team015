@@ -134,9 +134,9 @@ export const singleCategoryController = async (req, res) => {
 	}
 };
 
-//delete category
+// delete category
 // Bug Fix: Fixed function name from "deleteCategoyCOntroller" to "deleteCategoryController"
-export const deleteCategoryCOntroller = async (req, res) => {
+export const deleteCategoryController = async (req, res) => {
 	try {
 		const { id } = req.params;
 		await categoryModel.findByIdAndDelete(id);
