@@ -4,6 +4,8 @@ import validator from "validator";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
+import { error } from "console";
+import validator from "validator";
 
 export const registerController = async (req, res) => {
   try {
@@ -182,12 +184,18 @@ export const forgotPasswordController = async (req, res) => {
 
     // Validate answer
     if (!answer) {
-      return res.status(400).send({ success: false, message: "Answer is required" });
+      return res.status(400).send({ 
+        success: false, 
+        message: "Answer is required" 
+      });
     }
 
     // Validate newPassword
     if (!newPassword) {
-      return res.status(400).send({ success: false, message: "New Password is required" });
+      return res.status(400).send({ 
+        success: false, 
+        message: "New Password is required" 
+      });
     }
 
     if (newPassword.length < 6) {
@@ -233,18 +241,28 @@ export const testController = (req, res) => {
   }
 };
 
-//update prfole
+//update profile
 export const updateProfileController = async (req, res) => {
   try {
-    const { name, email, password, address, phone } = req.body;
+    const { name, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
+    
+    //handle name
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (name && !nameRegex.test(name)) {
+      throw new Error("Name can contain only letters and spaces!");
+    }
+
     //password
     if (password && password.length < 6) {
-      return res.status(400).send({
-        success: false,
-        message: "Password is required and 6 character long",
-      });
+      throw new Error("Password has to be longer than 6 characters!");
     }
+
+    if (phone && !validator.isMobilePhone(phone, "en-SG")) {
+      throw new Error("Invalid Singapore phone number");
+    }
+
+
     const hashedPassword = password ? await hashPassword(password) : undefined;
     const updatedUser = await userModel.findByIdAndUpdate(
       req.user._id,
@@ -254,18 +272,19 @@ export const updateProfileController = async (req, res) => {
         phone: phone || user.phone,
         address: address || user.address,
       },
-      { new: true }
+      { new: true,
+        runValidators: true //including for last line of checks by model
+       }
     );
     res.status(200).send({
       success: true,
-      message: "Profile Updated SUccessfully",
+      message: "Profile Updated Successfully",
       updatedUser,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: error.message,
       error,
     });
   }
@@ -283,7 +302,7 @@ export const getOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error while fetching orders",
       error,
     });
   }
@@ -295,13 +314,14 @@ export const getAllOrdersController = async (req, res) => {
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: "-1" });
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      // spelling mistake
+      message: "Error while fetching orders",
       error,
     });
   }
@@ -322,7 +342,8 @@ export const orderStatusController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Updateing Order",
+      // spelling mistake
+      message: "Error while fetching orders",
       error,
     });
   }

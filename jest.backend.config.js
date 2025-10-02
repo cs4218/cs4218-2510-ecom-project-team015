@@ -12,7 +12,7 @@ export default {
     "<rootDir>/controllers/authController.test.js",
     "<rootDir>/config/*.test.js",
     "<rootDir>/models/*.test.js",
-    // "<rootDir>/controllers/*.test.js"
+    "<rootDir>/controllers/*.test.js"
   ],
 
   // jest code coverage
