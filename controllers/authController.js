@@ -1,11 +1,9 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
 import validator from "validator";
-
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
-import { error } from "console";
-import validator from "validator";
+
 
 export const registerController = async (req, res) => {
   try {
