@@ -20,12 +20,18 @@ describe("registerController", () => {
         jest.clearAllMocks();
     });
 
+    // Reset the mocks after each test case
+    afterEach(() => {
+        jest.resetAllMocks();
+    });
+
     it("should return error if name is missing", async () => {
         // The request body is empty to simulate missing name
         await registerController(req, res);
 
         // Check it returns the correct status and message 
-        expect(res.send).toHaveBeenCalledWith({ error: "Name is Required" });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Name is Required" });
     });
 
     it("should return error if email is missing", async () => {
@@ -33,7 +39,10 @@ describe("registerController", () => {
         req.body = { name: "Test User" };
 
         await registerController(req, res);
-        expect(res.send).toHaveBeenCalledWith({ message: "Email is Required" });
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is Required" });
     });
 
     it("should return error if password is missing", async () => {    
@@ -41,7 +50,21 @@ describe("registerController", () => {
         req.body = { name: "Test User", email: "test@gmail.com" };
 
         await registerController(req, res);
-        expect(res.send).toHaveBeenCalledWith({ message: "Password is Required" });
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Password is Required" });
+    });
+
+    it("should return error if password is less than 6 characters", async () => {
+        // The request body has name, email and password with less than 6 characters
+        req.body = { name: "Test User", email: "test@gmail.com", password: "pass" };
+
+        await registerController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Password must be at least 6 characters long" });
     });
 
     it("should return error if phone number is missing", async () => {
@@ -49,7 +72,10 @@ describe("registerController", () => {
         req.body = { name: "Test User", email: "test@gmail.com", password: "password1234" };
 
         await registerController(req, res);
-        expect(res.send).toHaveBeenCalledWith({ message: "Phone no is Required" });
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Phone no is Required" });
     });
 
     it("should return error if address is missing", async () => {
@@ -57,20 +83,33 @@ describe("registerController", () => {
         req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678" };
 
         await registerController(req, res);
-        expect(res.send).toHaveBeenCalledWith({ message: "Address is Required" });
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Address is Required" });
+    });
+
+    it("should return error if DOB is missing", async () => {
+        // The request body has name, email, password and phone number but missing DOB
+        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street" };
+
+        await registerController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "DOB is Required" });
     });
 
     it("should return error if answer is missing", async () => {
         // The request body has name, email, password, phone number and address but missing answer
-        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street" };
+        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", DOB: "01/01/2000" };
 
         await registerController(req, res);
-        expect(res.send).toHaveBeenCalledWith({ message: "Answer is Required" });
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Answer is Required" });
     });
 
     it("should return error if user already exists", async () => {
         // The request body has all required fields
-        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", answer: "test" };
+        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", DOB: "01/01/2000", answer: "test" };
 
         // Mock the userModel.findOne method to return a user
         userModel.findOne.mockResolvedValue({ email: "test@gmail.com" });
@@ -82,7 +121,7 @@ describe("registerController", () => {
 
     it("should register user successfully", async () => {
         // The request body has all required fields
-        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", answer: "test" };
+        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street",DOB: "01/01/2000", answer: "test" };
 
         // Mock the userModel.findOne method to return null
         userModel.findOne.mockResolvedValue(null);
@@ -105,19 +144,59 @@ describe("registerController", () => {
         }));
     });
 
-    it("should catch the errors during registration", async () => {
+    it("should catch validation errors during registration", async () => {
         // The request body has all required fields
-        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", answer: "test" };
+        req.body = { name: "Test User", email: "invalidEmail", password: "password1234", phone: "12345678", address: "123 Test Street", DOB: "01/01/2000", answer: "test" };
 
-        // Mock the userModel.findOne method to return a database error
-        userModel.findOne.mockRejectedValue(new Error("Database error"));
+        const validationError = {
+            name: "ValidationError",
+            errors: {
+                email: { message: "Invalid email" }
+            }
+        };
+
+        // Mock the userModel.findOne method to return validation error
+        userModel.findOne.mockRejectedValue(validationError);
+
+        await registerController(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+            success: false,
+            message: "Invalid email",
+        }));
+    });
+
+    it("should catch the specifc errors during registration", async () => {
+        // The request body has all required fields
+        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", DOB: "01/01/2000", answer: "test" };
+
+        const hashError = new Error("Password hashing failed");
+
+        // Mock the hashPassword method to throw an error
+        hashPassword.mockImplementation(() => { throw hashError; });
+
+        await registerController(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+            success: false,
+            message: "Password hashing failed",
+        }));
+    });
+
+    it("should return default error message if error has no message during registration", async () => {
+        // The request body has all required fields
+        req.body = { name: "Test User", email: "test@gmail.com", password: "password1234", phone: "12345678", address: "123 Test Street", DOB: "01/01/2000", answer: "test" };
+
+        const unknownError = new Error();
+
+        // Mock throwing an unknown error
+        hashPassword.mockImplementation(() => { throw unknownError; });
 
         await registerController(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
             success: false,
             message: "Error in Registration",
-            error: expect.any(Error),
         }));
     });
 });
@@ -384,6 +463,7 @@ describe("testController", () => {
         expect(res.send).toHaveBeenCalledWith({ error: expect.any(Error) });
     });
 });
+
 // Test cases for Update Profile controller
 // Test cases for Get Orders controller
 // Test cases for Get All Orders controller
