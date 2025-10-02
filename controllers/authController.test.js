@@ -218,7 +218,7 @@ describe("loginController", () => {
         });
     });
 
-    it("should catch the database errors during login", async () => {
+    it("should handle the errors during login", async () => {
         // The request body has correct email and password
         req.body = { email: "test@gmail.com", password: "password1234" };
 
@@ -229,12 +229,12 @@ describe("loginController", () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
             success: false,
-            message: "Error in login",
-            error: new Error("Database error"),
+            message: "Login Error, please try again",
+            error: expect.any(Error),
         }));
     });
     
-    it("should catch errors during token generation", async () => {
+    it("should catch specific errors during login", async () => {
         // The request body has correct email and password
         req.body = { email: "test@gmail.com", password: "password1234" };
 
@@ -255,14 +255,135 @@ describe("loginController", () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
             success: false,
-            message: "Error in login",
+            message: "Login Error, please try again",
             error: expect.objectContaining({ message: "Token generation error" }),
         }));
     });
 });
 
 // Test cases for Forgot Password controller
+describe("forgotPasswordController", () => {
+    let req, res;
+
+    // Mock req, res and reset them before each test case
+    beforeEach(() => {
+        req = { body: {} };
+        res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+        jest.clearAllMocks();
+    });
+
+    it("should return error if email is missing", async () => {
+        // The request body is empty to simulate missing email
+        await forgotPasswordController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is required" });
+    });
+
+    it("should return error if answer is missing", async () => {
+        // The request body has email but missing answer
+        req.body = { email: "test@gmail.com" };
+
+        await forgotPasswordController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Answer is required" });
+    });
+
+    it("should return error if new password is missing", async () => {
+        // The request body has email and answer but missing new password
+        req.body = { email: "test@gmail.com", answer: "test answer" };
+
+        await forgotPasswordController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "New Password is required" });
+    });
+
+    it("should return error if user with given email and answer does not exist", async () => {
+        // The request body has email, answer and new password
+        req.body = { email: "test@gmail.com", answer: "test answer", newPassword: "password1234" };
+
+        // Mock the userModel.findOne method to return null
+        userModel.findOne.mockResolvedValue(null);
+
+        await forgotPasswordController(req, res);    
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Wrong Email Or Answer" });
+    });
+
+    it("should reset password successfully when the credentials are valid", async () => {
+        // The request body has email, answer and new password
+        req.body = { email: "test@gmail.com", answer: "test answer", newPassword: "password1234" };
+
+        // Mock the userModel.findOne method to return a user
+        const fakeUser = { _id: "fakeUserId", name: "Test User", email: "test@gmail.com", password: "hashedPassword", phone: "12345678", address: "123 Test Street", role: "0" };
+        userModel.findOne.mockResolvedValue(fakeUser);
+
+        // Mock the hashPassword method to return a hashed password
+        hashPassword.mockResolvedValue("hashedPassword");
+
+        await forgotPasswordController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({ success: true, message: "Password Reset Successfully" });
+    });
+
+    it("should catch the errors during password reset", async () => {
+        // The request body has email, answer and new password
+        req.body = { email: "test@gmail.com", answer: "test answer", newPassword: "password1234" };
+
+        // Mock the hashPassword method to throw an error
+        hashPassword.mockImplementation(() => { throw new Error("Hashing failed"); });
+
+        await forgotPasswordController(req, res);    
+
+        // Check it returns the correct status and message        
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+            success: false,
+            message: "Something went wrong, try again later",
+            error: expect.any(Error),
+        }));
+    });
+});
+
 // Test cases for Test controller
+describe("testController", () => {
+    let req, res;
+
+    // Mock req, res and reset them before each test case
+    beforeEach(() => {
+        req = {};
+        res = { send: jest.fn() };
+        jest.clearAllMocks();
+    });
+
+    it("should return protected routes successfully", async () => {
+        testController(req, res);
+
+        // Check it returns the responce with correct message
+        expect(res.send).toHaveBeenCalledWith("Protected Routes");
+    });
+
+    it("should catch the errors during testController", async () => {
+        // Mock res.send to throw an error
+        res.send = jest.fn()
+        .mockImplementationOnce(() => { throw new Error("Test Error"); })    // Firct call throws error to enter catch block
+        .mockImplementation(() => {});                                  // Second call sends response
+
+        testController(req, res);    
+
+        // Check it returns error      
+        expect(res.send).toHaveBeenCalledWith({ error: expect.any(Error) });
+    });
+});
 // Test cases for Update Profile controller
 // Test cases for Get Orders controller
 // Test cases for Get All Orders controller
