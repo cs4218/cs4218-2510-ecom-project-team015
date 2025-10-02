@@ -1,6 +1,7 @@
-import { registerController, updateProfileController } from "../controllers/authController.js";
+import { registerController, updateProfileController, orderStatusController, getOrdersController, getAllOrdersController } from "../controllers/authController.js";
 import userModel from "../models/userModel.js";
 import { hashPassword, comparePassword } from "../helpers/authHelper.js";
+import orderModel from "../models/orderModel.js";
 
 // Mock the database model and helper functions
 jest.mock("../models/userModel.js");
@@ -271,4 +272,266 @@ describe("testing updateProfileController", () => {
     })
 });
 
+describe("When testing getOrdersController", () => {
+    let req, res;
+    beforeEach(() => {
+        req = {
+            user: {_id: "userId"},
+            body: {}};
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+            json: jest.fn(),
+        }
+        jest.clearAllMocks();
+    })
 
+    it("should return a json object populated when buyer and products exist", async() => {
+        const mockedOrder = {
+            _id: "orderId",   //order object id sample
+            buyer: {_id: "userId", name: "mockedUser"}, 
+            products: [{
+                _id: "prodId",    //product object id sample
+                name: "Jacket",
+                slug: "jacket",
+                description: "nice jacket",
+                price: 12,
+                category: "catId",
+                quantity: 5,
+            }],
+            payment: {},
+            status: "Not Processed"
+        };
+
+        
+        const mockPopulate = jest.fn().mockReturnThis();
+        // This chaining process was done with the help of ChatGPT
+        const fakeQuery = {
+            populate: mockPopulate,
+            then: (resolve) => resolve(mockedOrder),
+        };
+        orderModel.find = jest.fn(() => fakeQuery);
+
+        //act
+        await getOrdersController(req, res);
+
+        //assert
+        expect(orderModel.find).toHaveBeenCalledWith({buyer: "userId"});
+        expect(mockPopulate).toHaveBeenCalledWith("products", "-photo");
+        expect(mockPopulate).toHaveBeenCalledWith("buyer", "name");
+        expect(res.json).toHaveBeenCalledWith(mockedOrder);
+    });
+
+    it("should throw error 500 with message when there is an issue with getOrdersController", async () => {
+        orderModel.find = jest.fn().mockImplementation(() => { 
+            throw new Error("Server error");
+        });
+        consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+        await getOrdersController(req, res);
+
+        expect(orderModel.find).toHaveBeenCalled();
+        expect(res.json).not.toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenLastCalledWith(new Error("Server error"));
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({
+            success: false,
+            message: "Error while fetching orders",
+        }));
+    });
+});
+
+describe("When testing getAllOrdersController", () => {
+    let req, res;
+    beforeEach(() => {
+        req = {
+            user:{_id: "mockedUser"},
+            body: {}
+        };
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+            json: jest.fn(),
+        }
+        jest.clearAllMocks();
+    });
+
+     it("should return a json object populated when buyer and products exist", async() => {
+        const mockedOrder1 = {
+            _id: "orderId1",   //order object id sample
+            buyer: {_id: "userId", name: "mockedUser"}, 
+            products: [{
+                _id: "prodId",    //product object id sample
+                name: "Jacket",
+                slug: "jacket",
+                description: "nice jacket",
+                price: 12,
+                category: "catId",
+                quantity: 5,
+            }],
+            payment: {},
+            status: "Not Processed",
+            createdAt: 'time1'
+        };
+
+        const mockedOrder2 = {
+            _id: "orderId2",
+            buyer: {_id: "userId2", name: "anotherMockedUser"},
+            products: [{
+                _id: "prodId2",    //product object id sample
+                name: "Pant",
+                slug: "pant",
+                description: "jeans pant",
+                price: 112,
+                category: "catId",
+                quantity: 7,
+            }],
+            payment: {},
+            status: "Not Processed",
+            createdAt: "time2"
+        };
+        
+        const mockPopulate = jest.fn().mockReturnThis();
+        const mockSort = jest.fn().mockReturnThis();
+        const fakeQuery = {
+            populate: mockPopulate,
+            sort: mockSort,
+            then: (resolve) => resolve([
+                mockedOrder1,
+                mockedOrder2
+            ]),
+        };
+        orderModel.find = jest.fn(() => fakeQuery);
+
+        //act
+        await getAllOrdersController(req, res);
+
+        //assert
+        expect(orderModel.find).toHaveBeenCalledWith({});
+        expect(mockPopulate).toHaveBeenCalledWith("products", "-photo");
+        expect(mockPopulate).toHaveBeenCalledWith("buyer", "name");
+        expect(mockSort).toHaveBeenCalledWith({
+            createdAt: -1
+        });
+        expect(res.json).toHaveBeenCalledWith([
+            mockedOrder1,
+            mockedOrder2
+        ]);
+    });
+
+    it("should return error 500 response when there is an error in fetching all orders", async() => {
+        orderModel.find = jest.fn().mockImplementation(() => {
+            throw new Error("Server error");
+        })
+        consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+        await getAllOrdersController(req, res);
+        
+        expect(res.json).not.toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenLastCalledWith(new Error("Server error"));
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining(
+            {
+                success: false,
+                message: "Error while fetching orders",
+            }
+        ));
+    });
+});
+
+describe("When testing orderStatusController", () => {
+    let req, res;
+    beforeEach(() => {
+        req = {};
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+            json: jest.fn(),
+        };
+    });
+
+    it("should return back order with updated status if changed successfully", async() => {
+        req.params = {
+            orderId: "orderId123"
+        };
+
+        req.body = {
+            status: "Processed"
+        };
+        const order = {
+            _id: "orderId123",
+            buyer: {_id: "userId2", name: "anotherMockedUser"},
+            products: [{
+                _id: "prodId2",    //product object id sample
+                name: "Pant",
+                slug: "pant",
+                description: "jeans pant",
+                price: 112,
+                category: "catId",
+                quantity: 7,
+            }],
+            payment: {},
+            status: "Not Processed",
+            createdAt: "time2"
+        };
+        
+        orderModel.findByIdAndUpdate = jest.fn().mockResolvedValue(order);
+    
+        await orderStatusController(req, res);
+
+        expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+            req.params.orderId, 
+            {status: req.body.status},
+            {new: true}
+        );
+        expect(res.json).toHaveBeenCalledWith(order);
+    });
+
+    it("should return error 500 status if there was an error in finding order and updating", async() => {
+        req.params = {
+            orderId: "orderId123"
+        };
+
+        req.body = {
+            status: "Not Processed"
+        };
+        const order = {
+            _id: "orderId123",
+            buyer: {_id: "userId2", name: "anotherMockedUser"},
+            products: [{
+                _id: "prodId2",    //product object id sample
+                name: "Pant",
+                slug: "pant",
+                description: "jeans pant",
+                price: 112,
+                category: "catId",
+                quantity: 7,
+            }],
+            payment: {},
+            status: "Not Processed",
+            createdAt: "time2"
+        };
+
+        orderModel.findByIdAndUpdate = jest.fn().mockImplementation(() => {
+            throw new Error("Error when updating status");
+        })
+        consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+        await orderStatusController(req, res);
+
+        expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+            req.params.orderId,
+            {status: req.body.status},
+            {new: true}
+        );
+
+        expect(res.json).not.toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalledWith(new Error("Error when updating status"));
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining(
+            {
+                success: false,
+                message: "Error while fetching orders",
+            }
+        ));
+    })
+});

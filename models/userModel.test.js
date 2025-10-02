@@ -20,6 +20,7 @@ beforeEach(async () => {
 });
 
 describe("Given user model", () => {
+    //This test case has been generated with some help from ChatGPT for the time functions
     test("When user details are correct", async() => {
         const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const yesterdayISOString = yesterday.toISOString();
