@@ -309,7 +309,7 @@ export const getOrdersController = async (req, res) => {
 export const getAllOrdersController = async (req, res) => {
   try {
     const orders = await orderModel
-      .find({ buyer: req.user._id })
+      .find({})
       .populate("products", "-photo")
       .populate("buyer", "name")
       .sort({ createdAt: -1 });
