@@ -14,7 +14,8 @@ const Products = () => {
       setProducts(data.products);
     } catch (error) {
       console.log(error);
-      toast.error("Someething Went Wrong");
+      // Bug fix: Corrected the typo in "Someething" to "Something"
+      toast.error("Something Went Wrong"); 
     }
   };
 

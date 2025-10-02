@@ -2,21 +2,18 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import AdminDashboard from "./AdminDashboard";
 
-// Mock the useAuth hook from the auth context
 jest.mock("../../context/auth", () => ({
 	useAuth: jest.fn(),
 }));
 
-// Mock the Layout component 
 jest.mock("../../components/Layout", () => ({
 	__esModule: true,
 	default: ({ children }) => <div data-testid="mock-layout">{children}</div>,
 }));
 
-// Mock the AdminMenu component 
 jest.mock("../../components/AdminMenu", () => ({
 	__esModule: true,
-	default: () => <nav data-testid="mock-admin-menu">Admin Menu</nav>,
+	default: () => <div data-testid="mock-admin-menu">AdminMenu</div>,
 }));
 
 const { useAuth } = jest.requireMock("../../context/auth");
