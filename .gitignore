@@ -6,4 +6,3 @@ node_modules
 .scannerwork
 .env.**
 sonar-project.local.properties
-/coverage/
