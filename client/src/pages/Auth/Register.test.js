@@ -32,23 +32,8 @@ jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
   }));  
 
-//   Object.defineProperty(window, 'localStorage', {
-//     value: {
-//       setItem: jest.fn(),
-//       getItem: jest.fn(),
-//       removeItem: jest.fn(),
-//     },
-//     writable: true,
-//   });
+jest.mock("../../hooks/useCategory", () => jest.fn(() =>[])); // Mock useCategory to return null state and a mock function
 
-// window.matchMedia = window.matchMedia || function() {
-//     return {
-//       matches: false,
-//       addListener: function() {},
-//       removeListener: function() {}
-//     };
-//   };
-      
 const setupRegisterPage = () => {
     return render(
         <MemoryRouter initialEntries={['/register']}>
@@ -73,26 +58,13 @@ describe('Register Component', () => {
         expect(screen.getByPlaceholderText('Enter Your Name')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Your Email')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Your Password')).toBeInTheDocument();
-        expect(screen.getByPlaceholderText('Enter Your Phone')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Enter Your Phone Number(SG)')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Your Address')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Enter Your DOB')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('What is Your Favorite sports')).toBeInTheDocument();
 
         expect(screen.getByRole('button', { name: 'REGISTER' })).toBeInTheDocument();
     });
-
-
-    // // To test that all the required fields are present
-    // it('should throw validation errors when fields are empty', async () => {
-    //     setupRegisterPage();
-
-
-    //     fireEvent.click(screen.getByText('REGISTER'));
-
-    //     await waitFor(() => {
-    //         expect(toast.error).toHaveBeenCalledWith('Please fill in this field.');
-    //     });
-    // });
 
     // To test that the user is registered successfully
     it('should register the user successfully', async () => {
@@ -103,7 +75,7 @@ describe('Register Component', () => {
         fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
         fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
         fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
-        fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Phone Number(SG)'), { target: { value: '1234567890' } });
         fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
         fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
         fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
@@ -127,7 +99,7 @@ describe('Register Component', () => {
         });
 
         // To test that toast.success was called
-        expect(toast.success).toHaveBeenCalledWith('Register Successfully, please login');
+        expect(toast.success).toHaveBeenCalledWith('Registered Successfully, please login');
 
         // To test that navigation to login page was attempted using mocked useNavigate
         expect(mockNavigate).toHaveBeenCalledWith('/login');
@@ -147,7 +119,7 @@ describe('Register Component', () => {
         fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
         fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
         fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
-        fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Phone Number(SG)'), { target: { value: '1234567890' } });
         fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
         fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
         fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
@@ -155,7 +127,17 @@ describe('Register Component', () => {
         fireEvent.click(getByText('REGISTER'));
 
         // To test that axios.post was called 
-        await waitFor(() => expect(axios.post).toHaveBeenCalled());
+        await waitFor(() => {
+            expect(axios.post).toHaveBeenCalledWith("/api/v1/auth/register", {
+                name: 'John Doe',
+                email: 'test@example.com',
+                password: 'password123',
+                phone: '1234567890',
+                address: '123 Street',
+                DOB: '2000-01-01',
+                answer: 'Football'
+            })        
+        });
 
         // To test that toast.error was called with the error message upon failed registration
         expect(toast.error).toHaveBeenCalledWith('Email already exists: Proceed to login');
@@ -164,15 +146,15 @@ describe('Register Component', () => {
         expect(mockNavigate).not.toHaveBeenCalledWith('/login');
     });
 
-        it('should display error message on failed registration', async () => {
-        axios.post.mockRejectedValueOnce(new Error('Network Error'));
+    it('should display default error message on failed registration', async () => {
+        axios.post.mockRejectedValueOnce(new Error());
 
         const { getByText, getByPlaceholderText } = setupRegisterPage();
 
         fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
         fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
         fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
-        fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Phone Number(SG)'), { target: { value: '1234567890' } });
         fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
         fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
         fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
@@ -183,9 +165,34 @@ describe('Register Component', () => {
         await waitFor(() => expect(axios.post).toHaveBeenCalled());
 
         // To test that toast.error was called with the error message upon failed registration
-        expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+        expect(toast.error).toHaveBeenCalledWith("Something went wrong");
 
         // To test that navigation to login page was not attempted
         expect(mockNavigate).not.toHaveBeenCalledWith('/login');
+    });
+
+    it('should display specific error message on failed registration', async () => {
+        const errorResponse = { response: { data: { message: "Network Error" } } };
+
+        // Mock axios.post to reject with an error containing a response with a message
+        axios.post.mockRejectedValueOnce(errorResponse);
+
+        const { getByText, getByPlaceholderText } = setupRegisterPage();
+
+        fireEvent.change(getByPlaceholderText('Enter Your Name'), { target: { value: 'John Doe' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Phone Number(SG)'), { target: { value: '1234567890' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
+        fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
+        fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
+
+        fireEvent.click(getByText('REGISTER')); 
+
+        // To test that axios.post was called 
+        await waitFor(() => expect(axios.post).toHaveBeenCalled());
+
+        // To test that toast.error was called with the error message upon failed registration
+        expect(toast.error).toHaveBeenCalledWith("Network Error");
     });
 });

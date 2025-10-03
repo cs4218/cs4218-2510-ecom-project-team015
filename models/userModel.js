@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: (value) => validator.isMobilePhone(value, "en-SG"), 
-        message: "Invalid phone number",
+        message: "Invalid phone number: Must be a valid Singapore phone number",
       },
     },
     address: {
