@@ -34,19 +34,21 @@ const Profile = () => {
         phone,
         address,
       });
-      if (data?.errro) {
-        toast.error(data?.error);
-      } else {
-        setAuth({ ...auth, user: data?.updatedUser });
-        let ls = localStorage.getItem("auth");
-        ls = JSON.parse(ls);
-        ls.user = data.updatedUser;
-        localStorage.setItem("auth", JSON.stringify(ls));
-        toast.success("Profile Updated Successfully");
+      setAuth({ ...auth, user: data?.updatedUser });
+      let ls = localStorage.getItem("auth");
+      ls = JSON.parse(ls);
+      ls.user = data.updatedUser;
+      localStorage.setItem("auth", JSON.stringify(ls));
+      toast.success("Profile Updated Successfully");
+    }
+     catch (error) {
+      if (error.response?.data?.message) {
+         toast.error(error.response.data.message); 
       }
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
+      else {
+        console.log(error);
+        toast.error("Something went wrong");
+      }
     }
   };
   return (

@@ -9,18 +9,14 @@ export default {
 	testMatch: [
 		"<rootDir>/helpers/*.test.js",
 		"<rootDir>/middlewares/*.test.js",
-		"<rootDir>/controllers/categoryController.test.js",
-		"<rootDir>/controllers/productController.test.js",
+		"<rootDir>/config/*.test.js",
+		"<rootDir>/models/*.test.js",
+		"<rootDir>/controllers/*.test.js",
 	],
 
 	// jest code coverage
 	collectCoverage: true,
-	collectCoverageFrom: [
-		"helpers/**",
-		"middlewares/**",
-		"controllers/categoryController.js",
-		"controllers/productController.js",
-	],
+	collectCoverageFrom: ["helpers/**", "middlewares/**", "controllers/**", "models/**"],
 	coverageThreshold: {
 		global: {
 			lines: 80,
