@@ -10,11 +10,11 @@ const { Option } = Select;
 
 const AdminOrders = () => {
   const [status, setStatus] = useState([
-    "Not Process",
+    "Not Processed",
     "Processing",
     "Shipped",
-    "deliverd",
-    "cancel",
+    "Delivered",
+    "Cancelled",
   ]);
   // Bug Fix: Corrected typo from "chageStatus" to "changeStatus"
   // and setCHangeStatus to setChangeStatus
@@ -83,7 +83,7 @@ const AdminOrders = () => {
                         </Select>
                       </td>
                       <td>{o?.buyer?.name}</td>
-                      <td>{moment(o?.createAt).fromNow()}</td>
+                      <td>{moment(o?.createdAt).fromNow()}</td>
                       <td>{o?.payment.success ? "Success" : "Failed"}</td>
                       <td>{o?.products?.length}</td>
                     </tr>
