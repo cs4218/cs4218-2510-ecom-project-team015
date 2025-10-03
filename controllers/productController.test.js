@@ -1,0 +1,710 @@
+import {
+	createProductController,
+	updateProductController,
+	deleteProductController,
+} from "./productController.js";
+import { BraintreeGateway, Environment } from "braintree";
+import dotenv from "dotenv";
+import fs from "fs";
+
+jest.mock("slugify", () => ({
+	__esModule: true,
+	default: (s) => `slug-${String(s)}`,
+}));
+
+jest.mock("dotenv", () => ({
+	__esModule: true,
+	default: { config: jest.fn() },
+}));
+
+// Mock Created using ChatGPT
+jest.mock("fs", () => {
+	const rfs = jest.fn(() => Buffer.from("fake-bytes"));
+	return {
+		__esModule: true,
+		default: { readFileSync: rfs },
+		readFileSync: rfs,
+	};
+});
+
+// Mock Created using ChatGPT
+jest.mock("braintree", () => ({
+	__esModule: true,
+	default: {
+		BraintreeGateway: jest.fn().mockImplementation(() => ({})),
+		Environment: { Sandbox: "sandbox" },
+	},
+}));
+
+jest.mock("../models/categoryModel.js", () => ({ __esModule: true, default: {} }));
+jest.mock("../models/orderModel.js", () => ({ __esModule: true, default: {} }));
+
+jest.mock("../models/productModel.js", () => {
+	const save = jest.fn();
+	const findByIdAndUpdate = jest.fn();
+	const findByIdAndDelete = jest.fn();
+
+	const Mock = function (doc) {
+		this.doc = doc;
+		this.photo = {};
+		this.save = save;
+	};
+
+	Mock.findByIdAndUpdate = findByIdAndUpdate;
+	Mock.findByIdAndDelete = findByIdAndDelete;
+	return {
+		__esModule: true,
+		default: Mock,
+		__mockFns: { save, findByIdAndUpdate, findByIdAndDelete },
+	};
+});
+
+// Created using ChatGPT
+import { __mockFns } from "../models/productModel.js";
+const { save, findByIdAndUpdate, findByIdAndDelete } = __mockFns;
+
+const makeRes = () => ({
+	status: jest.fn().mockReturnThis(),
+	send: jest.fn(),
+	end: jest.fn(),
+});
+
+let logSpy;
+
+beforeEach(() => {
+	jest.clearAllMocks();
+	logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+});
+
+afterEach(() => {
+	logSpy.mockRestore();
+});
+
+describe("productController Component", () => {
+	// CREATE PRODUCT
+	describe("createProductController", () => {
+		describe("Presence Validation for Input fields", () => {
+			const base = {
+				description: "Good",
+				price: 10,
+				category: "Books",
+				quantity: 1,
+				shipping: 0,
+			};
+
+			// rows created using ChatGPT
+			// Each row is: label, fields override, expected error
+			const rows = [
+				["name is missing", {}, "Name is Required"],
+				["name field is empty", { name: "" }, "Name is Required"],
+				[
+					"description is missing",
+					{ name: "Product", description: undefined },
+					"Description is Required",
+				],
+				[
+					"description field is empty",
+					{ name: "Product", description: "" },
+					"Description is Required",
+				],
+				[
+					"missing price",
+					{ name: "Product", description: "Good", price: undefined },
+					"Price is Required",
+				],
+				[
+					"price field is empty",
+					{ name: "Product", description: "Good", price: "" },
+					"Price is Required",
+				],
+				[
+					"category is missing",
+					{ name: "Product", description: "Good", price: 10, category: undefined },
+					"Category is Required",
+				],
+				[
+					"category field is empty",
+					{ name: "Product", description: "Good", price: 10, category: "" },
+					"Category is Required",
+				],
+				[
+					"quantity is missing",
+					{
+						name: "Product",
+						description: "Good",
+						price: 10,
+						category: "Books",
+						quantity: undefined,
+					},
+					"Quantity is Required",
+				],
+				[
+					"quantity field is empty",
+					{ name: "Product", description: "Good", price: 10, category: "Books", quantity: "" },
+					"Quantity is Required",
+				],
+			];
+
+			test.each(rows)("sends a status 500 when %s", async (_label, overrides, expectedMsg) => {
+				const fields = { ...base, ...overrides };
+				const res = makeRes();
+				await createProductController(
+					{
+						fields,
+						files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+					},
+					res
+				);
+
+				expect(res.status).toHaveBeenCalledWith(500);
+				expect(res.send).toHaveBeenCalledWith({ error: expectedMsg });
+			});
+		});
+
+		it("sends a status 500 when photo is missing", async () => {
+			const req = {
+				fields: {
+					name: "Product",
+					description: "Product is Good",
+					price: 10,
+					category: "Books",
+					quantity: 1,
+					shipping: 0,
+				},
+				files: {},
+			};
+			const res = makeRes();
+
+			await createProductController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith({
+				error: "Photo is required",
+			});
+			expect(fs.readFileSync).not.toHaveBeenCalled();
+		});
+
+		it("sends a status 500 when photo size is greater than 1MB", async () => {
+			const req = {
+				fields: {
+					name: "Product",
+					description: "Product is Good",
+					price: 10,
+					category: "Books",
+					quantity: 1,
+					shipping: 0,
+				},
+				files: { photo: { size: 2000000, path: "/public/img.jpg", type: "image/jpg" } },
+			};
+			const res = makeRes();
+
+			await createProductController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith({
+				error: "Photo should be less than 1MB",
+			});
+			expect(fs.readFileSync).not.toHaveBeenCalled();
+		});
+
+		it("sends a status 201 on success for products that have all the required fields filled and contain an image", async () => {
+			const savedDoc = { _id: "1" };
+			save.mockResolvedValue(savedDoc);
+
+			const req = {
+				fields: {
+					name: "Phone",
+					description: "Nice phone",
+					price: 999,
+					category: "Electronics",
+					quantity: 2,
+					shipping: 1,
+				},
+				files: { photo: { size: 1000, path: "/public/phone.jpg", type: "image/jpg" } },
+			};
+
+			const res = makeRes();
+
+			await createProductController(req, res);
+
+			expect(fs.readFileSync).toHaveBeenCalledWith("/public/phone.jpg");
+			expect(save).toHaveBeenCalledTimes(1);
+
+			expect(res.status).toHaveBeenCalledWith(201);
+
+			const payload = res.send.mock.calls[0][0];
+			expect(payload.success).toBe(true);
+			expect(payload.message).toBe("Product Created Successfully");
+			expect(payload.products).toBeDefined();
+			expect(payload.products.doc.slug).toBe("slug-Phone");
+			expect(payload.products.photo.contentType).toBe("image/jpg");
+			expect(Buffer.isBuffer(payload.products.photo.data)).toBe(true);
+		});
+
+		describe("Boundary Analysis for Price and Quantity", () => {
+			const base = {
+				name: "Sample Product",
+				description: "Good",
+				category: "Books",
+				shipping: 1,
+			};
+
+			beforeEach(() => {
+				save.mockResolvedValue({ _id: "1" });
+			});
+
+			// rows is created using ChatGPT
+			// Each row is: label, price, quantity, expectedStatus, expectedMsg
+			const rows = [
+				["sends a status 400 when price=0", 0, 10, 400, "Price must be > 0 and ≤ 1000000"],
+				[
+					"sends a status 400 when price>max",
+					1_000_001,
+					10,
+					400,
+					"Price must be > 0 and ≤ 1000000",
+				],
+				[
+					"sends a status 400 when qty=0",
+					200,
+					0,
+					400,
+					"Quantity must be an integer > 0 and ≤ 100000",
+				],
+				[
+					"sends a status 400 qty is decimal",
+					200,
+					2.5,
+					400,
+					"Quantity must be an integer > 0 and ≤ 100000",
+				],
+				[
+					"sends a status 400 when qty>max",
+					200,
+					100_001,
+					400,
+					"Quantity must be an integer > 0 and ≤ 100000",
+				],
+				["sends a status 201 when lower boundary is OK", 1, 1, 201, null],
+				["sends a status 201 when upper boundary is OK", 1_000_000, 100_000, 201, null],
+			];
+
+			test.each(rows)("%s", async (_label, price, quantity, expected, msg) => {
+				const req = {
+					fields: { ...base, price, quantity },
+					files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+				};
+				const res = makeRes();
+
+				await createProductController(req, res);
+
+				expect(res.status).toHaveBeenCalledWith(expected);
+				if (expected === 400) {
+					expect(res.send).toHaveBeenCalledWith({ error: msg });
+				} else {
+					expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+				}
+			});
+		});
+
+		it("sends a status 500 if an unexpected error happens and logs it", async () => {
+			const error = new Error("network issue");
+			save.mockRejectedValue(error);
+			const req = {
+				fields: {
+					name: "Tablet",
+					description: "Nice product",
+					price: 50,
+					category: "Electronics",
+					quantity: 4,
+					shipping: 0,
+				},
+				files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+			};
+			const res = makeRes();
+
+			await createProductController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith(
+				expect.objectContaining({
+					success: false,
+					error: error,
+					message: "Error in creating product",
+				})
+			);
+			expect(logSpy).toHaveBeenCalled();
+		});
+	});
+
+	// UPDATE PRODUCT
+	describe("updateProductController", () => {
+		describe("Presence Validation for Input fields", () => {
+			const base = {
+				description: "Good",
+				price: 10,
+				category: "Books",
+				quantity: 1,
+				shipping: 0,
+			};
+
+			// rows created using ChatGPT
+			// Each row is: label, fields override, expected error
+			const rows = [
+				["name is missing", {}, "Name is Required"],
+				["name field is empty", { name: "" }, "Name is Required"],
+				[
+					"description is missing",
+					{ name: "Product", description: undefined },
+					"Description is Required",
+				],
+				[
+					"description field is empty",
+					{ name: "Product", description: "" },
+					"Description is Required",
+				],
+				[
+					"missing price",
+					{ name: "Product", description: "Good", price: undefined },
+					"Price is Required",
+				],
+				[
+					"price field is empty",
+					{ name: "Product", description: "Good", price: "" },
+					"Price is Required",
+				],
+				[
+					"category is missing",
+					{ name: "Product", description: "Good", price: 10, category: undefined },
+					"Category is Required",
+				],
+				[
+					"category field is empty",
+					{ name: "Product", description: "Good", price: 10, category: "" },
+					"Category is Required",
+				],
+				[
+					"quantity is missing",
+					{
+						name: "Product",
+						description: "Good",
+						price: 10,
+						category: "Books",
+						quantity: undefined,
+					},
+					"Quantity is Required",
+				],
+				[
+					"quantity field is empty",
+					{ name: "Product", description: "Good", price: 10, category: "Books", quantity: "" },
+					"Quantity is Required",
+				],
+			];
+
+			test.each(rows)("sends a status 500 when %s", async (_label, overrides, expectedMsg) => {
+				const fields = { ...base, ...overrides };
+				const res = makeRes();
+				await updateProductController(
+					{
+						params: { pid: "1" },
+						fields,
+						files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+					},
+					res
+				);
+
+				expect(res.status).toHaveBeenCalledWith(500);
+				expect(res.send).toHaveBeenCalledWith({ error: expectedMsg });
+			});
+		});
+
+		it("sends a status 500 when photo is missing", async () => {
+			const req = {
+				fields: {
+					name: "Product",
+					description: "Product is Good",
+					price: 10,
+					category: "Books",
+					quantity: 1,
+					shipping: 0,
+				},
+				files: {},
+			};
+			const res = makeRes();
+
+			await updateProductController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith({
+				error: "Photo is required",
+			});
+			expect(fs.readFileSync).not.toHaveBeenCalled();
+			expect(findByIdAndUpdate).not.toHaveBeenCalled();
+		});
+
+		it("sends a status 500 when photo size is greater than 1MB", async () => {
+			const req = {
+				fields: {
+					name: "Product",
+					description: "Product is Good",
+					price: 10,
+					category: "Books",
+					quantity: 1,
+					shipping: 0,
+				},
+				files: { photo: { size: 2000000, path: "/src/img.jpg", type: "image/jpg" } },
+			};
+			const res = makeRes();
+
+			await updateProductController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith({
+				error: "Photo should be less than 1MB",
+			});
+			expect(fs.readFileSync).not.toHaveBeenCalled();
+			expect(findByIdAndUpdate).not.toHaveBeenCalled();
+		});
+
+		it("sends a status 201 on success for products that have all the required fields filled and contain an image", async () => {
+			const doc = { _id: "1", photo: {}, save: jest.fn().mockResolvedValue({ _id: "1" }) };
+			findByIdAndUpdate.mockResolvedValue(doc);
+
+			const fields = {
+				name: "Phone",
+				description: "Great",
+				price: 299,
+				category: "c1",
+				quantity: 2,
+				shipping: 1,
+			};
+
+			const files = { photo: { size: 1000, path: "/public/phone.jpg", type: "image/jpeg" } };
+
+			const res = makeRes();
+
+			await updateProductController({ params: { pid: "1" }, fields, files }, res);
+
+			expect(findByIdAndUpdate).toHaveBeenCalledWith(
+				"1",
+				expect.objectContaining({ name: "Phone", slug: "slug-Phone" }),
+				{ new: true }
+			);
+			expect(fs.readFileSync).toHaveBeenCalledWith("/public/phone.jpg");
+			expect(doc.save).toHaveBeenCalledTimes(1);
+			expect(res.status).toHaveBeenCalledWith(201);
+			expect(res.send).toHaveBeenCalledWith({
+				success: true,
+				message: "Product Updated Successfully",
+				products: doc,
+			});
+		});
+
+		describe("Boundary Analysis for Price and Quantity", () => {
+			const base = {
+				name: "Sample Product",
+				description: "Good",
+				category: "Books",
+				shipping: 1,
+			};
+
+			beforeEach(() => {
+				save.mockResolvedValue({ _id: "1" });
+			});
+
+			// rows is created using ChatGPT
+			// Each row is: label, price, quantity, expectedStatus, expectedMsg
+			const rows = [
+				["sends a status 400 when price=0", 0, 10, 400, "Price must be > 0 and ≤ 1000000"],
+				[
+					"sends a status 400 when price>max",
+					1_000_001,
+					10,
+					400,
+					"Price must be > 0 and ≤ 1000000",
+				],
+				[
+					"sends a status 400 when qty=0",
+					200,
+					0,
+					400,
+					"Quantity must be an integer > 0 and ≤ 100000",
+				],
+				[
+					"sends a status 400 qty is decimal",
+					200,
+					2.5,
+					400,
+					"Quantity must be an integer > 0 and ≤ 100000",
+				],
+				[
+					"sends a status 400 when qty>max",
+					200,
+					100_001,
+					400,
+					"Quantity must be an integer > 0 and ≤ 100000",
+				],
+				["sends a status 201 when lower boundary is OK", 1, 1, 201, null],
+				["sends a status 201 when upper boundary is OK", 1_000_000, 100_000, 201, null],
+			];
+
+			test.each(rows)("%s", async (_label, price, quantity, expected, msg) => {
+				if (expected === 201) {
+					findByIdAndUpdate.mockResolvedValue({
+						_id: "1",
+						photo: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+						save,
+					});
+				}
+
+				const res = makeRes();
+				await updateProductController(
+					{
+						params: { pid: "1" },
+						fields: { ...base, price, quantity },
+						files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+					},
+					res
+				);
+
+				expect(res.status).toHaveBeenCalledWith(expected);
+
+				if (expected === 400) {
+					expect(res.send).toHaveBeenCalledWith({ error: msg });
+				} else {
+					expect(findByIdAndUpdate).toHaveBeenCalledWith(
+						"1",
+						expect.objectContaining({ slug: expect.any(String) }),
+						{ new: true }
+					);
+					expect(save).toHaveBeenCalled();
+					expect(res.send).toHaveBeenCalledWith(
+						expect.objectContaining({ success: true, message: "Product Updated Successfully" })
+					);
+				}
+			});
+		});
+
+		it("sends a status 404 when product id is not found", async () => {
+			findByIdAndUpdate.mockResolvedValue(null);
+
+			const fields = {
+				name: "Product",
+				description: "Nice Product",
+				price: 10,
+				category: "Books",
+				quantity: 1,
+				shipping: 0,
+			};
+			const res = makeRes();
+
+			await updateProductController(
+				{
+					params: { pid: "1" },
+					fields,
+					files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+				},
+				res
+			);
+
+			expect(findByIdAndUpdate).toHaveBeenCalledWith("1", expect.any(Object), { new: true });
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.send).toHaveBeenCalledWith({
+				success: false,
+				message: "Product not found",
+			});
+		});
+
+		it("sends a status 500 if an unexpected error happens and logs it", async () => {
+			const error = new Error("network issue");
+			findByIdAndUpdate.mockRejectedValue(error);
+
+			const fields = {
+				name: "Prod",
+				description: "Good",
+				price: 10,
+				category: "Books",
+				quantity: 1,
+				shipping: 0,
+			};
+			const res = makeRes();
+
+			await updateProductController(
+				{
+					params: { pid: "1" },
+					fields,
+					files: { photo: { size: 1000, path: "/public/img.jpg", type: "image/jpg" } },
+				},
+				res
+			);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith({
+				success: false,
+				error: error,
+				message: "Error in updating product",
+			});
+			expect(logSpy).toHaveBeenCalled();
+		});
+	});
+
+	// DELETE PRODUCT
+	describe("deleteProductController", () => {
+		it("sends a status 200 when the product is successfully deleted", async () => {
+			const select = jest.fn().mockResolvedValue({ _id: "1" });
+			findByIdAndDelete.mockReturnValue({ select });
+
+			const req = { params: { pid: "1" } };
+			const res = makeRes();
+
+			await deleteProductController(req, res);
+
+			expect(findByIdAndDelete).toHaveBeenCalledWith("1");
+			expect(select).toHaveBeenCalledWith("-photo");
+			expect(res.status).toHaveBeenCalledWith(200);
+			expect(res.send).toHaveBeenCalledWith({
+				success: true,
+				message: "Product Deleted successfully",
+			});
+		});
+
+		it("sends a status 404 when the product id is not found", async () => {
+			const select = jest.fn().mockResolvedValue(null);
+			findByIdAndDelete.mockReturnValue({ select });
+
+			const req = { params: { pid: "1" } };
+			const res = makeRes();
+
+			await deleteProductController(req, res);
+
+			expect(findByIdAndDelete).toHaveBeenCalledWith("1");
+			expect(select).toHaveBeenCalledWith("-photo");
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.send).toHaveBeenCalledWith({
+				success: false,
+				message: "Product not found",
+			});
+		});
+
+		it("sends a status 500 when an unexpected error happens", async () => {
+			const error = new Error("network issue");
+			const select = jest.fn().mockRejectedValue(error);
+			findByIdAndDelete.mockReturnValue({ select });
+
+			const req = { params: { pid: "1" } };
+			const res = makeRes();
+
+			await deleteProductController(req, res);
+
+			expect(findByIdAndDelete).toHaveBeenCalledWith("1");
+			expect(select).toHaveBeenCalledWith("-photo");
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith({
+				success: false,
+				message: "Error while deleting product",
+				error: error,
+			});
+			expect(logSpy).toHaveBeenCalled();
+		});
+	});
+});

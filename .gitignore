@@ -4,6 +4,5 @@ node_modules
 /blob-report/
 /playwright/.cache/
 .scannerwork
-.env
+.env.**
 sonar-project.local.properties
-/coverage/
