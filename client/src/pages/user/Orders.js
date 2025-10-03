@@ -4,6 +4,7 @@ import Layout from "./../../components/Layout";
 import axios from "axios";
 import { useAuth } from "../../context/auth";
 import moment from "moment";
+import toast from "react-hot-toast";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -14,6 +15,7 @@ const Orders = () => {
       setOrders(data);
     } catch (error) {
       console.log(error);
+      toast.error(error?.response?.data.message || "Error fetching orders");
     }
   };
 
@@ -22,7 +24,7 @@ const Orders = () => {
   }, [auth?.token]);
   return (
     <Layout title={"Your Orders"}>
-      <div className="container-flui p-3 m-3 dashboard">
+      <div className="container-fluid p-3 m-3 dashboard">
         <div className="row">
           <div className="col-md-3">
             <UserMenu />
@@ -31,14 +33,14 @@ const Orders = () => {
             <h1 className="text-center">All Orders</h1>
             {orders?.map((o, i) => {
               return (
-                <div className="border shadow">
+                <div className="border shadow" key={o._id}>
                   <table className="table">
                     <thead>
                       <tr>
                         <th scope="col">#</th>
                         <th scope="col">Status</th>
                         <th scope="col">Buyer</th>
-                        <th scope="col"> date</th>
+                        <th scope="col"> Date</th>
                         <th scope="col">Payment</th>
                         <th scope="col">Quantity</th>
                       </tr>
@@ -48,28 +50,29 @@ const Orders = () => {
                         <td>{i + 1}</td>
                         <td>{o?.status}</td>
                         <td>{o?.buyer?.name}</td>
-                        <td>{moment(o?.createAt).fromNow()}</td>
-                        <td>{o?.payment.success ? "Success" : "Failed"}</td>
+                        <td>{moment(o?.createdAt).fromNow()}</td>
+                        <td>{o?.payment?.success ? "Success" : "Failed"}</td>
                         <td>{o?.products?.length}</td>
                       </tr>
                     </tbody>
                   </table>
                   <div className="container">
                     {o?.products?.map((p, i) => (
-                      <div className="row mb-2 p-3 card flex-row" key={p._id}>
+                      <div className="row mb-2 p-3 card flex-row" key={p._id} data-testid={`product-${p._id}`}>
                         <div className="col-md-4">
                           <img
                             src={`/api/v1/product/product-photo/${p._id}`}
                             className="card-img-top"
+                            data-testid={`product-img-${p._id}`}
                             alt={p.name}
                             width="100px"
                             height={"100px"}
                           />
                         </div>
                         <div className="col-md-8">
-                          <p>{p.name}</p>
-                          <p>{p.description.substring(0, 30)}</p>
-                          <p>Price : {p.price}</p>
+                          <p data-testid={`product-name-${p._id}`}>{p.name}</p>
+                          <p data-testid={`product-desc-${p._id}`}>{p.description.substring(0, 30)}</p>
+                          <p data-testid={`product-price-${p._id}`}>Price : {p.price}</p>
                         </div>
                       </div>
                     ))}
