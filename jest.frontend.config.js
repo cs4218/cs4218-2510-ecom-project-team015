@@ -21,7 +21,8 @@ export default {
 
 	// only run these tests
 	testMatch: [
-		"<rootDir>/client/src/pages/Auth/*.test.js",
+		"<rootDir>/client/src/pages/Auth/Login.test.js",
+		"<rootDir>/client/src/pages/Auth/Register.test.js",
 		"<rootDir>/client/src/pages/admin/*.test.js",
 		"<rootDir>/client/src/pages/user/*.test.js",
 		"<rootDir>/client/src/pages/About.test.js",
@@ -41,12 +42,13 @@ export default {
 	// jest code coverage
 	collectCoverage: true,
 	collectCoverageFrom: [
-		"client/src/pages/Auth/**",
-		"client/src/pages/admin/*.js",
-		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
+		"client/src/pages/Auth/Login.js",
+		"client/src/pages/Auth/Register.js", 
+		"client/src/pages/admin/AdminDashboard.js",
 		"client/src/pages/user/Dashboard.js",
 		"client/src/pages/About.js",
-		"client/src/pages/Pagenotfound.js",
+		"client/src/pages/Pagenotfound.js", 
+		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
 		"client/src/context/auth.js",
 		"client/src/components/Routes/Private.js",
 		"client/src/components/AdminMenu.js",

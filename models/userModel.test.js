@@ -123,7 +123,7 @@ describe("Given user model", () => {
             err = error;
         }
         expect(err.errors.phone).toBeDefined();
-        expect(err.errors.phone.message).toBe("Invalid phone number");
+        expect(err.errors.phone.message).toBe("Invalid phone number: Must be a valid Singapore phone number");
     })
 
     test("When mandatory fields not filled", async() => {
