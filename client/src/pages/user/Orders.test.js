@@ -6,7 +6,7 @@ import {useAuth} from "../../context/auth";
 import { useCart } from "../../context/cart";
 import { MemoryRouter } from "react-router-dom";
 import { useSearch } from "../../context/search";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import '@testing-library/jest-dom';
 
 
@@ -14,6 +14,7 @@ jest.mock("axios");
 jest.mock("../../context/auth");
 jest.mock("../../context/cart");
 jest.mock("../../context/search");
+jest.mock("react-hot-toast");
 
 describe("When rendering orders page", () => {
     beforeEach(() => {
@@ -143,7 +144,6 @@ describe("When rendering orders page", () => {
     test("logs error and displays toast message if request rejected by backend", async() => {
         useAuth.mockReturnValue([{ token: "invalidToken", user: {name: "mockedUser" }}, jest.fn()]);   //invalid token
         const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-        toast.error = jest.fn();
         const mockedOrder = {
             _id: "orderId",   //order object id sample
             buyer: {_id: "userId", name: "mockedUser"}, 
@@ -191,5 +191,27 @@ describe("When rendering orders page", () => {
         );
 
         expect(Orders.getOrders).not.toHaveBeenCalled();
-    })
+    });
+
+    test("toast message displayed if error response does not contain data", async() => {
+        useAuth.mockReturnValue([{ token: "invalidToken", user: {name: "mockedUser" }}, jest.fn()]);
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+        axios.get.mockRejectedValue({
+        });
+
+        //Act
+        render(
+            <MemoryRouter>
+                <Orders />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenLastCalledWith(expect.objectContaining({}));
+        });
+        await waitFor(() => {
+            expect(toast.error).toHaveBeenCalled();
+        });
+    });
 });
