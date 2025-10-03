@@ -11,10 +11,15 @@ export default function AdminRoute(){
 
     useEffect(()=> {
         const authCheck = async() => {
-            const res = await axios.get("/api/v1/auth/admin-auth");
-            if(res.data.ok){
-                setOk(true);
-            } else {
+            try {
+                const res = await axios.get("/api/v1/auth/admin-auth");
+                if(res.data?.ok){
+                    setOk(true);
+                } else {
+                    setOk(false);
+                }
+            } catch (error) {
+                console.error("Authentication check from backend failed: ", error.message);
                 setOk(false);
             }
         };
