@@ -10,11 +10,17 @@ export default {
 		"<rootDir>/helpers/*.test.js",
 		"<rootDir>/middlewares/*.test.js",
 		"<rootDir>/controllers/categoryController.test.js",
+		"<rootDir>/controllers/productController.test.js",
 	],
 
 	// jest code coverage
 	collectCoverage: true,
-	collectCoverageFrom: ["helpers/**", "middlewares/**", "controllers/categoryController.js"],
+	collectCoverageFrom: [
+		"helpers/**",
+		"middlewares/**",
+		"controllers/categoryController.js",
+		"controllers/productController.js",
+	],
 	coverageThreshold: {
 		global: {
 			lines: 80,

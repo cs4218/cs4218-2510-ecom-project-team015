@@ -9,7 +9,7 @@ jest.mock("slugify", () => ({
 	default: (s) => `slug-${String(s)}`,
 }));
 
-// Created using ChatGPT
+// Mock Created using ChatGPT
 jest.mock("../models/categoryModel.js", () => {
 	const save = jest.fn();
 	const findOne = jest.fn();
