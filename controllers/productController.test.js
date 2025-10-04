@@ -554,6 +554,29 @@ describe("productController Component", () => {
 			expect(fs.readFileSync).not.toHaveBeenCalled();
 			expect(findByIdAndUpdate).not.toHaveBeenCalled();
 		});
+		// it("sends a status 500 when photo is missing", async () => {
+		// 	const req = {
+		// 		fields: {
+		// 			name: "Product",
+		// 			description: "Product is Good",
+		// 			price: 10,
+		// 			category: "Books",
+		// 			quantity: 1,
+		// 			shipping: 0,
+		// 		},
+		// 		files: {},
+		// 	};
+		// 	const res = makeRes();
+
+		// 	await updateProductController(req, res);
+
+		// 	expect(res.status).toHaveBeenCalledWith(500);
+		// 	expect(res.send).toHaveBeenCalledWith({
+		// 		error: "Photo is required",
+		// 	});
+		// 	expect(fs.readFileSync).not.toHaveBeenCalled();
+		// 	expect(findByIdAndUpdate).not.toHaveBeenCalled();
+		// });
 
 		it("sends 500 when photo size > 1MB", async () => {
 			const req = {
@@ -576,7 +599,7 @@ describe("productController Component", () => {
 
 			expect(res.status).toHaveBeenCalledWith(500);
 			expect(res.send).toHaveBeenCalledWith({
-				error: "Photo should be less than 1MB",
+				error: "Photo is required and should be less than 1MB",
 			});
 			expect(fs.readFileSync).not.toHaveBeenCalled();
 			expect(findByIdAndUpdate).not.toHaveBeenCalled();

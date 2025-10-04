@@ -23,6 +23,8 @@ jest.mock("../../components/AdminMenu", () => ({
 	default: () => <nav data-testid="mock-admin-menu">Admin Menu</nav>,
 }));
 
+jest.mock("moment", () => () => ({ fromNow: () => "3 hours ago" }));
+
 // Mock created Using ChatGPT
 jest.mock("antd", () => {
 	const React = require("react");
@@ -46,11 +48,15 @@ beforeEach(() => {
 	jest.clearAllMocks();
 });
 
+const withToken = (token = "token123") => useAuth.mockReturnValue([{ token }, jest.fn()]);
+
 describe("Admin Orders component", () => {
-	it("renders Layout, AdminMenu, page heading and passes the correct Layout title", () => {
-		useAuth.mockReturnValue([{ token: "abcd12345" }, jest.fn()]);
+	it("renders Layout, AdminMenu, page heading and the correct Layout title", () => {
+		withToken();
 		axios.get.mockResolvedValue({ data: [] });
+
 		render(<AdminOrders />);
+
 		const layout = screen.getByTestId("mock-layout");
 		expect(layout).toBeInTheDocument();
 		expect(layout).toHaveAttribute("data-title", "All Orders Data");
@@ -58,19 +64,17 @@ describe("Admin Orders component", () => {
 		expect(screen.getByRole("heading", { name: /all orders/i, level: 1 })).toBeInTheDocument();
 	});
 
-	it("calls GET when token exists", async () => {
-		useAuth.mockReturnValue([{ token: "abcd12345" }, jest.fn()]);
+	it("fetches orders when auth token is present", async () => {
+		withToken();
 		axios.get.mockResolvedValue({ data: [] });
-
 		render(<AdminOrders />);
-
 		await waitFor(() => {
 			expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/all-orders");
 		});
 	});
 
-	it("does not call GET when token is missing", async () => {
-		useAuth.mockReturnValue([{}, jest.fn()]);
+	it("does not fetch orders when auth token is missing", async () => {
+		withToken("");
 		render(<AdminOrders />);
 		await waitFor(() => {
 			expect(axios.get).not.toHaveBeenCalled();
@@ -78,14 +82,15 @@ describe("Admin Orders component", () => {
 	});
 
 	it("displays order data in the table", async () => {
-		useAuth.mockReturnValue([{ token: "abcd12345" }, jest.fn()]);
+		withToken();
+
 		axios.get.mockResolvedValue({
 			data: [
 				{
 					_id: "order1",
 					status: "Processing",
 					buyer: { name: "Sarah Jones" },
-					createAt: new Date().toISOString(),
+					createdAt: new Date().toISOString(),
 					payment: { success: true },
 					products: [
 						{
@@ -110,15 +115,15 @@ describe("Admin Orders component", () => {
 		expect(screen.getByDisplayValue("Processing")).toBeInTheDocument();
 	});
 
-	it("updates status via PUT and refetches orders", async () => {
-		useAuth.mockReturnValue([{ token: "abc123" }, jest.fn()]);
-		axios.get.mockResolvedValue({
+	it("updates order status via PUT and then refetches once", async () => {
+		withToken();
+		axios.get.mockResolvedValueOnce({
 			data: [
 				{
 					_id: "order1",
 					status: "Processing",
-					buyer: { name: "Sarah Jones" },
-					createAt: new Date().toISOString(),
+					buyer: { name: "Sarah" },
+					createdAt: new Date().toISOString(),
 					payment: { success: true },
 					products: [],
 				},
@@ -126,31 +131,31 @@ describe("Admin Orders component", () => {
 		});
 		axios.put.mockResolvedValue({ data: {} });
 
+		axios.get.mockResolvedValueOnce({ data: [] });
+
 		render(<AdminOrders />);
 
 		const select = await screen.findByDisplayValue("Processing");
-
 		fireEvent.change(select, { target: { value: "Shipped" } });
-		await waitFor(() => {
+
+		await waitFor(() =>
 			expect(axios.put).toHaveBeenCalledWith("/api/v1/auth/order-status/order1", {
 				status: "Shipped",
-			});
-		});
+			})
+		);
 
-		await waitFor(() => {
-			expect(axios.get).toHaveBeenCalledTimes(2);
-		});
+		await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
 	});
 
-	it("renders Failed when payment.success is false", async () => {
-		useAuth.mockReturnValue([{ token: "abc123" }, jest.fn()]);
+	it("shows Failed when payment is unsuccessful", async () => {
+		withToken();
 		axios.get.mockResolvedValue({
 			data: [
 				{
 					_id: "o1",
 					status: "Processing",
 					buyer: { name: "Kieta" },
-					createAt: new Date().toISOString(),
+					createdAt: new Date().toISOString(),
 					payment: { success: false },
 					products: [],
 				},
@@ -162,15 +167,15 @@ describe("Admin Orders component", () => {
 		expect(await screen.findByText("Failed")).toBeInTheDocument();
 	});
 
-	it("shows quantity 0 when there are no products", async () => {
-		useAuth.mockReturnValue([{ token: "abcd123" }, jest.fn()]);
+	it("shows quantity 0 when products are empty", async () => {
+		withToken();
 		axios.get.mockResolvedValue({
 			data: [
 				{
 					_id: "o1",
 					status: "Processing",
 					buyer: { name: "Alice" },
-					createAt: new Date().toISOString(),
+					createdAt: new Date().toISOString(),
 					payment: { success: true },
 					products: [],
 				},
@@ -181,23 +186,68 @@ describe("Admin Orders component", () => {
 		expect(await screen.findByText("0")).toBeInTheDocument();
 	});
 
-	it("swallows errors on GET without crashing", async () => {
-		useAuth.mockReturnValue([{ token: "abcd12345" }, jest.fn()]);
-		axios.get.mockRejectedValue(new Error("network down"));
+	it("updates the correct order when multiple orders are present", async () => {
+		withToken();
+		axios.get.mockResolvedValue({
+			data: [
+				{
+					_id: "o1",
+					status: "Processing",
+					buyer: { name: "A" },
+					createdAt: new Date().toISOString(),
+					payment: { success: true },
+					products: [],
+				},
+				{
+					_id: "o2",
+					status: "Not Processed",
+					buyer: { name: "B" },
+					createdAt: new Date().toISOString(),
+					payment: { success: false },
+					products: [],
+				},
+			],
+		});
+		axios.put.mockResolvedValue({ data: {} });
+
 		render(<AdminOrders />);
-		expect(screen.getByRole("heading", { name: /all orders/i })).toBeInTheDocument();
+
+		const selectO1 = await screen.findByDisplayValue("Processing");
+		const selectO2 = screen.getByDisplayValue("Not Processed");
+
+		fireEvent.change(selectO2, { target: { value: "Cancelled" } });
+
+		await waitFor(() =>
+			expect(axios.put).toHaveBeenCalledWith("/api/v1/auth/order-status/o2", {
+				status: "Cancelled",
+			})
+		);
+
+		expect(axios.put).not.toHaveBeenCalledWith("/api/v1/auth/order-status/o1", expect.anything());
 	});
 
 	// Created Using ChatGPT
-	it("swallows errors on PUT without crashing", async () => {
-		useAuth.mockReturnValue([{ token: "abc123" }, jest.fn()]);
+	it("GET failure: page remains stable without crashing", async () => {
+		const spy = jest.spyOn(console, "log").mockImplementation(() => {});
+		withToken();
+		axios.get.mockRejectedValue(new Error("network down"));
+
+		render(<AdminOrders />);
+
+		expect(screen.getByRole("heading", { name: /all orders/i })).toBeInTheDocument();
+		spy.mockRestore();
+	});
+
+	// Created Using ChatGPT
+	it("PUT failure: page remains stable without crashing", async () => {
+		withToken();
 		axios.get.mockResolvedValue({
 			data: [
 				{
 					_id: "order1",
 					status: "Processing",
 					buyer: { name: "Sarah Jones" },
-					createAt: new Date().toISOString(),
+					createdAt: new Date().toISOString(),
 					payment: { success: true },
 					products: [],
 				},
@@ -208,10 +258,33 @@ describe("Admin Orders component", () => {
 		render(<AdminOrders />);
 
 		const select = await screen.findByDisplayValue("Processing");
-		fireEvent.change(select, { target: { value: "cancel" } });
+		fireEvent.change(select, { target: { value: "Cancelled" } });
 		await waitFor(() => {
 			expect(axios.put).toHaveBeenCalled();
 		});
 		expect(screen.getByRole("heading", { name: /all orders/i })).toBeInTheDocument();
 	});
+
+	// Created using ChatGPT
+	it("is resilient to missing fields (no buyer / products undefined)", async () => {
+		withToken();
+		axios.get.mockResolvedValue({
+			data: [
+				{
+					_id: "o1",
+					status: "Processing",
+					buyer: undefined,
+					createdAt: new Date().toISOString(),
+					payment: { success: true },
+					products: undefined,
+				},
+			],
+		});
+
+		render(<AdminOrders />);
+
+		expect(await screen.findByDisplayValue("Processing")).toBeInTheDocument();
+		expect(screen.getByText("3 hours ago")).toBeInTheDocument();
+	});
+
 });
