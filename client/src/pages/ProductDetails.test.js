@@ -12,6 +12,10 @@ import axios from "axios";
 
 // ---- Mocks ----
 
+// Mock axios
+jest.mock("axios");
+
+
 // Mock react-router hooks: useParams (slug) + useNavigate using Chat GPT
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -31,8 +35,6 @@ jest.mock("./../components/Layout", () => ({
 	),
 }));
 
-// Mock axios
-jest.mock("axios");
 
 // Silence console.error for warning noises (optional) using ChatGPT
 let consoleErrorSpy;
@@ -72,6 +74,7 @@ describe("Product details", () => {
 				slug: "macbook-air",
 			},
 		];
+
 
 		// useParams returns slug
 		const { useParams } = jest.requireMock("react-router-dom");
@@ -151,6 +154,102 @@ describe("Product details", () => {
 		});
 	});
 
+
+	test("shows no similar products message when related list empty", async () => {
+		const product = {
+			_id: "p1",
+			name: "Pen",
+			description: "Blue pen",
+			price: 2,
+			category: { _id: "c1", name: "Stationery" },
+		};
+		const { useParams } = jest.requireMock("react-router-dom");
+		useParams.mockReturnValue({ slug: "pen" });
+
+		axios.get.mockResolvedValueOnce({ data: { product } });
+		axios.get.mockResolvedValueOnce({ data: { products: [] } });
+
+		render(<ProductDetails />);
+		expect(
+			await screen.findByText(/No Similar Products found/i)
+		).toBeInTheDocument();
+	});
+
+
+	test("renders main product image with correct src and alt", async () => {
+		const product = {
+			_id: "p99",
+			name: "Water Bottle",
+			description: "Reusable bottle",
+			price: 10,
+			category: { _id: "c2", name: "Accessories" },
+		};
+
+		const { useParams } = jest.requireMock("react-router-dom");
+		useParams.mockReturnValue({ slug: "water-bottle" });
+
+		axios.get.mockResolvedValueOnce({ data: { product } });
+		axios.get.mockResolvedValueOnce({ data: { products: [] } });
+
+		render(<ProductDetails />);
+
+		const img = await screen.findByAltText("Water Bottle");
+		expect(img).toHaveAttribute("src", "/api/v1/product/product-photo/p99");
+	});
+
+
+	test("renders Add to Cart button", async () => {
+		const product = {
+			_id: "p2",
+			name: "Backpack",
+			description: "Durable backpack",
+			price: 50,
+			category: { _id: "c7", name: "Bags" },
+		};
+
+		const { useParams } = jest.requireMock("react-router-dom");
+		useParams.mockReturnValue({ slug: "backpack" });
+
+		axios.get.mockResolvedValueOnce({ data: { product } });
+		axios.get.mockResolvedValueOnce({ data: { products: [] } });
+
+		render(<ProductDetails />);
+
+		expect(
+			await screen.findByRole("button", { name: /add to cart/i })
+		).toBeInTheDocument();
+	});
+
+
+	test("renders product price formatted in USD", async () => {
+		const product = {
+			_id: "p3",
+			name: "Notebook",
+			description: "Simple notebook",
+			price: 1234,
+			category: { _id: "c8", name: "Stationery" },
+		};
+
+		const { useParams } = jest.requireMock("react-router-dom");
+		useParams.mockReturnValue({ slug: "notebook" });
+
+		axios.get.mockResolvedValueOnce({ data: { product } });
+		axios.get.mockResolvedValueOnce({ data: { products: [] } });
+
+		render(<ProductDetails />);
+
+		expect(
+			await screen.findByText(/Price\s*:\s*\$1,234\.00/)
+		).toBeInTheDocument();
+	});
+
+
+	test("renders without crashing", () => {
+		render(<ProductDetails />);
+		expect(screen.getByTestId("layout")).toBeInTheDocument();
+	});
+
+
 	test("shows empty state when there are no related products", async () => {
 		const product = {
 			_id: "p1",
@@ -175,6 +274,8 @@ describe("Product details", () => {
 		expect(screen.getByText(/No Similar Products found/i)).toBeInTheDocument();
 	});
 
+
+	// made using ChatGPT
 	test("does nothing if no slug is present (does not call axios)", async () => {
 		// No slug provided
 		const { useParams } = jest.requireMock("react-router-dom");
@@ -191,6 +292,7 @@ describe("Product details", () => {
 		// We just assert that layout wrapper is present
 		expect(screen.getByTestId("layout")).toBeInTheDocument();
 	});
+
 
 	test("logs error if fetching fails (product call rejects)", async () => {
 		const errorSpy = jest.spyOn(console, "log").mockImplementation(() => {});
@@ -209,3 +311,4 @@ describe("Product details", () => {
 		errorSpy.mockRestore();
 	});
 });
+ 

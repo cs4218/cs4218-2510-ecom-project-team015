@@ -38,7 +38,6 @@ export default {
 		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
 		"client/src/pages/Auth/*.js",	
 		"client/src/pages/user/*.js",
-		"!client/src/pages/user/Profile.js", // Excluded as it is not yet implemented
 		"client/src/pages/*.js",
 		"!client/src/pages/CartPage.js", // Excluded as it is not yet implemented
 		"!client/src/pages/Categories.js", // Excluded as it is not yet implemented
