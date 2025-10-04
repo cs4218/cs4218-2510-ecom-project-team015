@@ -557,9 +557,10 @@ describe("productController Component", () => {
 
 		it("sends 500 when photo size > 1MB", async () => {
 			const req = {
+				params: { pid: "1" },
 				fields: {
 					name: "Product",
-					description: "Product is Good",
+					description: "Product",
 					price: 10,
 					category: "Books",
 					quantity: 1,
