@@ -29,7 +29,7 @@ const Register = () => {
         answer,
       });
       if (res && res.data.success) {
-        toast.success("Registered Successfully, please login");
+        toast.success(res.data.message);
         navigate("/login");
       } else {
         toast.error(res.data.message);
