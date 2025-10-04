@@ -21,49 +21,29 @@ export default {
 
 	// only run these tests
 	testMatch: [
-		"<rootDir>/client/src/pages/Auth/Login.test.js",
-		"<rootDir>/client/src/pages/Auth/Register.test.js",
-		//"<rootDir>/client/src/pages/admin/*.test.js",
-		"<rootDir>/client/src/pages/user/*.test.js",
-		"<rootDir>/client/src/pages/About.test.js",
-		"<rootDir>/client/src/pages/Pagenotfound.test.js",
-		"<rootDir>/client/src/context/auth.test.js",
-		"<rootDir>/client/src/components/Routes/*.test.js",
-		"<rootDir>/client/src/components/Form/*.test.js",
-		"<rootDir>/client/src/components/*.test.js",
-		"<rootDir>/client/src/components/Form/*.test.js",
-		"<rootDir>/client/src/pages/Search.test.js",
-		"<rootDir>/client/src/context/search.test.js",
-		"<rootDir>/client/src/pages/ProductDetails.test.js",
-		"<rootDir>/client/src/pages/CategoryProduct.test.js",
-
+		"<rootDir>/client/src/components/**/*.test.js",
+		"<rootDir>/client/src/context/**/*.test.js",
+		"<rootDir>/client/src/pages/**/*.test.js",
 	],
 
 	// jest code coverage
 	collectCoverage: true,
 	collectCoverageFrom: [
-		"client/src/pages/Auth/Login.js",
-		"client/src/pages/Auth/Register.js", 
-		"client/src/pages/admin/AdminDashboard.js",
-		"client/src/pages/user/*.js",
-		"client/src/pages/About.js",
-		"client/src/pages/Pagenotfound.js", 
+		"client/src/components/**/*.js",
+		"!client/src/components/Prices.js", // Excluded as it is not required
+		"!client/src/components/Routes/AdminRoute.js", // Excluded as it is not required
+		"client/src/context/**/*.js",
+		"!client/src/context/cart.js", // Excluded as it is not yet implemented
+		"client/src/pages/admin/*.js",
 		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
-		"!client/src/pages/user/Profile.js", // Excluded as not completed
-		"client/src/context/auth.js",
-		"client/src/components/Routes/Private.js",
-		"client/src/components/AdminMenu.js",
-		"client/src/components/Footer.js",
-		"client/src/components/Header.js",
-		"client/src/components/Layout.js",
-		"client/src/components/Spinner.js",
-		"client/src/components/UserMenu.js",
-		"client/src/components/Form/CategoryForm.js",
-		"client/src/pages/Search.js",
-		"client/src/context/search.js",
-		"client/src/components/Form/**",
-		"client/src/pages/ProductDetails.js",
-		"client/src/pages/CategoryProduct.js",
+		"client/src/pages/Auth/*.js",
+		"!client/src/pages/Auth/ForgotPassword.js", // Excluded as it is not yet implemented	
+		"client/src/pages/user/*.js",
+		"!client/src/pages/user/Profile.js", // Excluded as it is not yet implemented
+		"client/src/pages/*.js",
+		"!client/src/pages/CartPage.js", // Excluded as it is not yet implemented
+		"!client/src/pages/Categories.js", // Excluded as it is not yet implemented
+		"!client/src/pages/HomePage.js", // Excluded as it is not yet implemented
 	],
 	coverageThreshold: {
 		global: {
