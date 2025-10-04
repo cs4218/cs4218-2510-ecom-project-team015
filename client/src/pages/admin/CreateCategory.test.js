@@ -121,7 +121,7 @@ describe("CreateCategory Component", () => {
 		expect(toast.error).toHaveBeenCalledWith("Category already exists");
 	});
 
-	it("shows a toast error when backend returns 409 on create", async () => {
+	it("shows a toast error when backend returns a status 409 on create", async () => {
 		axios.post = jest.fn().mockRejectedValue({ response: { status: 409 } });
 
 		render(<CreateCategory />);
