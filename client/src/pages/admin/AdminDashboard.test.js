@@ -33,14 +33,15 @@ describe("Admin Dashboard Component", () => {
 		]);
 	});
 
-	it("shows admin details after login", () => {
+	it("shows admin details on the dashboard after login", () => {
 		render(<AdminDashboard />);
+		
 		expect(screen.getByText(/admin name\s*:\s*sarah jones/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin email\s*:\s*sarahjones@admin\.com/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin contact\s*:\s*80809090/i)).toBeInTheDocument();
 	});
 
-	it("renders Layout and AdminMenu", () => {
+	it("renders Layout and AdminMenu components", () => {
 		render(<AdminDashboard />);
 		expect(screen.getByTestId("mock-layout")).toBeInTheDocument();
 		expect(screen.getByTestId("mock-admin-menu")).toBeInTheDocument();
@@ -48,7 +49,9 @@ describe("Admin Dashboard Component", () => {
 
 	it("handles any missing user", () => {
 		useAuth.mockReturnValue([{}, jest.fn()]);
+
 		render(<AdminDashboard />);
+
 		expect(screen.getByText(/admin name\s*:/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin email\s*:/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin contact\s*:/i)).toBeInTheDocument();
@@ -57,7 +60,9 @@ describe("Admin Dashboard Component", () => {
 
 	it("handles any partial user fields", () => {
 		useAuth.mockReturnValue([{ user: { name: "Test Admin", email: "test@admin.com" } }, jest.fn()]);
+
 		render(<AdminDashboard />);
+
 		expect(screen.getByText(/admin name\s*:\s*test admin/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin email\s*:\s*test@admin\.com/i)).toBeInTheDocument();
 		expect(screen.getByText(/admin contact\s*:/i)).toBeInTheDocument();

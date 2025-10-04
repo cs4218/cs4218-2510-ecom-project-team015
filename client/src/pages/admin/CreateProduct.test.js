@@ -72,6 +72,39 @@ function arrangeDefaultAxios() {
 	});
 }
 
+const validForm = async ({
+	name = "Prod A",
+	description = "Nice",
+	price = 10,
+	quantity = 2,
+	category = "cat1",
+	shipping = "1",
+	photoBytes = 500_000,
+} = {}) => {
+	// text inputs
+	fireEvent.change(screen.getByPlaceholderText(/write a name/i), { target: { value: name } });
+	fireEvent.change(screen.getByPlaceholderText(/write a description/i), {
+		target: { value: description },
+	});
+	fireEvent.change(screen.getByPlaceholderText(/write a price/i), { target: { value: price } });
+	fireEvent.change(screen.getByPlaceholderText(/write a quantity/i), {
+		target: { value: quantity },
+	});
+
+	// category
+	const catSelect = await screen.findByTestId("antd-select-Select a category");
+	fireEvent.change(catSelect, { target: { value: category } });
+
+	// shipping
+	const shipSelect = screen.getByTestId(/antd-select-Select Shipping\s*$/);
+	fireEvent.change(shipSelect, { target: { value: String(shipping) } });
+
+	// photo
+	const file = new File(["x".repeat(photoBytes)], "pic.jpg", { type: "image/jpeg" });
+	const fileInput = screen.getByLabelText("Upload Photo", { selector: "input[type='file']" });
+	fireEvent.change(fileInput, { target: { files: [file] } });
+};
+
 beforeEach(() => {
 	jest.clearAllMocks();
 	arrangeDefaultAxios();
@@ -85,6 +118,147 @@ describe("CreateProduct Component", () => {
 		expect(layout).toHaveAttribute("data-title", "Dashboard - Create Product");
 		expect(screen.getByTestId("mock-admin-menu")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { name: /create product/i, level: 1 })).toBeInTheDocument();
+	});
+
+	it("blocks submit when name is blank", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ name: "   " });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Name is required"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when description is blank", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ description: " " });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Description is required"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when category is missing", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ category: " " });
+
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Category is required"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when price is missing", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ price: "" });
+
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Price is Required"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when quantity is missing", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ quantity: "" });
+
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Quantity is Required"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when photo is missing", async () => {
+		render(<CreateProduct />);
+
+		fireEvent.change(screen.getByPlaceholderText(/write a name/i), { target: { value: "P" } });
+		fireEvent.change(screen.getByPlaceholderText(/write a description/i), {
+			target: { value: "D" },
+		});
+		fireEvent.change(screen.getByPlaceholderText(/write a price/i), { target: { value: 10 } });
+		fireEvent.change(screen.getByPlaceholderText(/write a quantity/i), { target: { value: 2 } });
+		const catSelect = await screen.findByTestId("antd-select-Select a category");
+		fireEvent.change(catSelect, { target: { value: "cat1" } });
+
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Photo is required"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when photo size > 1MB", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ photoBytes: 1_000_001 });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Photo must be ≤ 1MB"));
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when quantity is not an integer", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ quantity: 2.5 });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith("Quantity must be an integer > 0 and ≤ 100000")
+		);
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when price ≤ 0", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ price: 0 });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith("Price must be > 0 and ≤ 1000000")
+		);
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when quantity ≤ 0", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ quantity: "0" });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith("Quantity must be an integer > 0 and ≤ 100000")
+		);
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when price is too large", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ price: "1000001" });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith("Price must be > 0 and ≤ 1000000")
+		);
+		expect(axios.post).not.toHaveBeenCalled();
+	});
+
+	it("blocks submit when quantity is too large", async () => {
+		render(<CreateProduct />);
+
+		await validForm({ quantity: "100001" });
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith("Quantity must be an integer > 0 and ≤ 100000")
+		);
+		expect(axios.post).not.toHaveBeenCalled();
 	});
 
 	it("loads categories and lets user pick a category", async () => {
@@ -110,40 +284,17 @@ describe("CreateProduct Component", () => {
 		expect(img).toHaveAttribute("src", "blob:preview-url");
 	});
 
-	it("creates product and shows success then navigates to products page", async () => {
+	it("successfully creates product and then navigates to products page", async () => {
 		axios.post = jest.fn().mockResolvedValue({ data: { success: true } });
 
 		render(<CreateProduct />);
 
-		fireEvent.change(screen.getByPlaceholderText("write a name"), {
-			target: { value: "Prod A" },
-		});
-		fireEvent.change(screen.getByPlaceholderText("write a description"), {
-			target: { value: "Desc" },
-		});
-		fireEvent.change(screen.getByPlaceholderText("write a Price"), {
-			target: { value: "10" },
-		});
-		fireEvent.change(screen.getByPlaceholderText("write a quantity"), {
-			target: { value: "3" },
-		});
-		fireEvent.change(await screen.findByTestId("antd-select-Select a category"), {
-			target: { value: "cat1" },
-		});
-
-		// Shipping select
-		const shipSelect = screen.getByTestId(/antd-select-Select Shipping\s*$/);
-		fireEvent.change(shipSelect, { target: { value: "1" } });
-
-		// Photo upload
-		const file = new File(["img"], "photo.png", { type: "image/png" });
-		const fileInput = screen.getByLabelText("Upload Photo", { selector: "input[type='file']" });
-		fireEvent.change(fileInput, { target: { files: [file] } });
+		await validForm();
 
 		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
 
 		await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
-		await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Product Created Successfully"));
+		expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
 		expect(mockNavigate).toHaveBeenCalledWith("/dashboard/admin/products");
 	});
 
@@ -153,7 +304,7 @@ describe("CreateProduct Component", () => {
 		render(<CreateProduct />);
 		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
 
-		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Something went wrong"));
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Name is required"));
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
 
@@ -165,11 +316,55 @@ describe("CreateProduct Component", () => {
 
 		render(<CreateProduct />);
 		await waitFor(() =>
-			expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting catgeory")
+			expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category")
 		);
 	});
 
-	it("does not set categories when API returns success: false", async () => {
+	it("shows conflict message when backend returns 409", async () => {
+		axios.post = jest.fn().mockRejectedValue({ response: { status: 409 } });
+
+		render(<CreateProduct />);
+		await validForm();
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Product already exists"));
+		expect(mockNavigate).not.toHaveBeenCalled();
+	});
+
+	it("shows invalid data message when backend returns 400", async () => {
+		axios.post = jest.fn().mockRejectedValue({ response: { status: 400 } });
+
+		render(<CreateProduct />);
+		await validForm();
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Invalid product data"));
+		expect(mockNavigate).not.toHaveBeenCalled();
+	});
+
+	it("surfaces backend response message", async () => {
+		axios.post = jest
+			.fn()
+			.mockRejectedValue({ response: { data: { message: "Backend rejects payload" } } });
+
+		render(<CreateProduct />);
+		await validForm();
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Backend rejects payload"));
+	});
+
+	it("surfaces backend response error string", async () => {
+		axios.post = jest.fn().mockRejectedValue({ response: { data: { error: "Bad payload" } } });
+
+		render(<CreateProduct />);
+		await validForm();
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Bad payload"));
+	});
+
+	it("does not set categories when API returns that create is unsuccessful", async () => {
 		axios.get.mockImplementation((url) => {
 			if (url.includes("/get-category"))
 				return Promise.resolve({ data: { success: false, category: [] } });
@@ -181,29 +376,57 @@ describe("CreateProduct Component", () => {
 		expect(within(categorySelect).queryAllByRole("option")).toHaveLength(0);
 	});
 
-	it("navigates on success when API returns success: true", async () => {
+	it("navigates on success when API returns that create is successful", async () => {
 		axios.post = jest.fn().mockResolvedValue({ data: { success: true } });
-
 		render(<CreateProduct />);
-
+		await validForm();
 		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
 
 		await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
-		await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Product Created Successfully"));
+		expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
 		expect(mockNavigate).toHaveBeenCalledWith("/dashboard/admin/products");
 	});
 
-	it("shows API error message when success: false", async () => {
+	it("shows API error message when create is unsuccessful", async () => {
 		axios.post = jest
 			.fn()
 			.mockResolvedValue({ data: { success: false, message: "Create failed" } });
-
 		render(<CreateProduct />);
-
+		await validForm();
 		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
 
 		await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
-		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Create failed"));
+		expect(toast.error).toHaveBeenCalledWith("Create failed");
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
+
+	it("shows generic error when create rejects without response", async () => {
+		axios.post = jest.fn().mockRejectedValue(new Error("network down"));
+
+		render(<CreateProduct />);
+		await validForm();
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+		expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+		expect(mockNavigate).not.toHaveBeenCalled();
+	});
+
+	it("does not render preview image before any photo is uploaded", () => {
+		render(<CreateProduct />);
+		expect(screen.queryByAltText("product_photo")).toBeNull();
+	});
+
+	it("shows default error when create is unsuccessful without a message", async () => {
+		axios.post = jest.fn().mockResolvedValue({ data: { success: false } });
+
+		render(<CreateProduct />);
+		await validForm();
+		fireEvent.click(screen.getByRole("button", { name: /create product/i }));
+
+		await waitFor(() => expect(axios.post).toHaveBeenCalledTimes(1));
+		expect(toast.error).toHaveBeenCalledWith("Create failed");
+		expect(mockNavigate).not.toHaveBeenCalled();
+	});
+
 });
