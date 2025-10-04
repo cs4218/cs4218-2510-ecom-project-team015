@@ -41,14 +41,9 @@ const Profile = () => {
       localStorage.setItem("auth", JSON.stringify(ls));
       toast.success("Profile Updated Successfully");
     }
-     catch (error) {
-      if (error.response?.data?.message) {
-         toast.error(error.response.data.message); 
-      }
-      else {
-        console.log(error);
-        toast.error("Something went wrong");
-      }
+    catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message) || "Something went wrong"; 
     }
   };
   return (
@@ -68,7 +63,7 @@ const Profile = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="exampleNameInput"
                     placeholder="Enter Your Name"
                     autoFocus
                   />
@@ -79,8 +74,8 @@ const Profile = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
-                    placeholder="Enter Your Email "
+                    id="exampleEmailInput"
+                    placeholder="Enter Your Email"
                     disabled
                   />
                 </div>
@@ -90,7 +85,7 @@ const Profile = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="form-control"
-                    id="exampleInputPassword1"
+                    id="examplePasswordInput"
                     placeholder="Enter Your Password"
                   />
                 </div>
@@ -100,7 +95,7 @@ const Profile = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="examplePhoneInput"
                     placeholder="Enter Your Phone"
                   />
                 </div>
@@ -110,12 +105,12 @@ const Profile = () => {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="exampleAddressInput"
                     placeholder="Enter Your Address"
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary" id="updateButton">
                   UPDATE
                 </button>
               </form>

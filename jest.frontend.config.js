@@ -23,7 +23,7 @@ export default {
 	testMatch: [
 		"<rootDir>/client/src/pages/Auth/Login.test.js",
 		"<rootDir>/client/src/pages/Auth/Register.test.js",
-		//"<rootDir>/client/src/pages/admin/*.test.js",
+		//"<rootDir>/client/src/pages/admin/*.test.js",	//failing
 		"<rootDir>/client/src/pages/user/*.test.js",
 		"<rootDir>/client/src/pages/About.test.js",
 		"<rootDir>/client/src/pages/Pagenotfound.test.js",
@@ -48,8 +48,8 @@ export default {
 		"client/src/pages/user/*.js",
 		"client/src/pages/About.js",
 		"client/src/pages/Pagenotfound.js", 
-		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
-		"!client/src/pages/user/Profile.js", // Excluded as not completed
+		"client/src/pages/admin/Users.js",
+		"client/src/pages/user/Profile.js",
 		"client/src/context/auth.js",
 		"client/src/components/Routes/Private.js",
 		"client/src/components/AdminMenu.js",
