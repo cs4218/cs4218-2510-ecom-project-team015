@@ -48,7 +48,6 @@ describe("Products Component", () => {
 		expect(axios.get).toHaveBeenCalledWith(API_URL);
 	});
 
-	// this test case is created using ChatGPT
 	it("renders product cards with correct links and images", async () => {
 		const products = [
 			{ _id: "p1", name: "Apple Watch", description: "Series 9", slug: "apple-watch" },
@@ -59,25 +58,21 @@ describe("Products Component", () => {
 
 		renderWithRouter(<Products />);
 
-		// Cards should appear after fetch resolves
 		const card1 = await screen.findByRole("heading", { name: "Apple Watch" });
 		const card2 = await screen.findByRole("heading", { name: "Kindle" });
 		expect(card1).toBeInTheDocument();
 		expect(card2).toBeInTheDocument();
 
-		// Check links
 		const link1 = screen.getByRole("link", { name: /Apple Watch/i });
 		const link2 = screen.getByRole("link", { name: /Kindle/i });
 		expect(link1).toHaveAttribute("href", "/dashboard/admin/product/apple-watch");
 		expect(link2).toHaveAttribute("href", "/dashboard/admin/product/kindle");
 
-		// Check images with alt text
 		const img1 = within(link1).getByRole("img", { name: "Apple Watch" });
 		const img2 = within(link2).getByRole("img", { name: "Kindle" });
 		expect(img1).toHaveAttribute("src", "/api/v1/product/product-photo/p1");
 		expect(img2).toHaveAttribute("src", "/api/v1/product/product-photo/p2");
 
-		// Check descriptions
 		expect(within(link1).getByText("Series 9")).toBeInTheDocument();
 		expect(within(link2).getByText("Paperwhite")).toBeInTheDocument();
 	});

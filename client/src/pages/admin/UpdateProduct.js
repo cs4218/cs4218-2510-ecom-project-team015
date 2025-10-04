@@ -28,7 +28,6 @@ const UpdateProduct = () => {
 			setId(data.product._id);
 			setDescription(data.product.description);
 			setPrice(data.product.price);
-			setPrice(data.product.price);
 			setQuantity(data.product.quantity);
 			setShipping(data.product.shipping);
 			setCategory(data.product.category._id);
@@ -50,7 +49,7 @@ const UpdateProduct = () => {
 		} catch (error) {
 			console.log(error);
 			// Bug fix: Corrected typo in error message from "wwent" to "went"
-			toast.error("Something went wrong in getting catgeory");
+			toast.error("Something went wrong in getting category");
 		}
 	};
 
@@ -58,15 +57,58 @@ const UpdateProduct = () => {
 		getAllCategory();
 	}, []);
 
+	const MAX_PRICE = 1_000_000;
+	const MAX_QTY = 100_000;
+	const MAX_PHOTO_BYTES = 1_000_000;
+	const isBlank = (s) => !String(s).trim();
+
 	//create product function
 	const handleUpdate = async (e) => {
 		e.preventDefault();
 		try {
+			const trimmedName = String(name).trim();
+			const trimmedDesc = String(description).trim();
+			const p = Number(price);
+			const q = Number(quantity);
+
+			if (isBlank(trimmedName)) {
+				toast.error("Name is required");
+				return;
+			}
+			if (isBlank(trimmedDesc)) {
+				toast.error("Description is required");
+				return;
+			}
+			if (isBlank(category)) {
+				toast.error("Category is required");
+				return;
+			}
+			if (price === "" || price == null || Number.isNaN(p)) {
+				toast.error("Price is Required");
+				return;
+			}
+			if (quantity === "" || quantity == null || Number.isNaN(q)) {
+				toast.error("Quantity is Required");
+				return;
+			}
+			if (photo && photo.size > MAX_PHOTO_BYTES) {
+				toast.error("Photo must be ≤ 1MB");
+				return;
+			}
+			if (p <= 0 || p > MAX_PRICE) {
+				toast.error(`Price must be > 0 and ≤ ${MAX_PRICE}`);
+				return;
+			}
+			if (!Number.isInteger(q) || q <= 0 || q > MAX_QTY) {
+				toast.error(`Quantity must be an integer > 0 and ≤ ${MAX_QTY}`);
+				return;
+			}
+
 			const productData = new FormData();
-			productData.append("name", name);
-			productData.append("description", description);
-			productData.append("price", price);
-			productData.append("quantity", quantity);
+			productData.append("name", trimmedName);
+			productData.append("description", trimmedDesc);
+			productData.append("price", String(p));
+			productData.append("quantity", String(q));
 			photo && productData.append("photo", photo);
 			productData.append("category", category);
 
@@ -78,7 +120,7 @@ const UpdateProduct = () => {
 				toast.success("Product Updated Successfully");
 				navigate("/dashboard/admin/products");
 			} else {
-				toast.error(data?.message);
+				toast.error(data?.message || "Update failed");
 			}
 		} catch (error) {
 			console.log(error);
@@ -89,8 +131,8 @@ const UpdateProduct = () => {
 	//delete a product
 	const handleDelete = async () => {
 		try {
-			let answer = window.prompt("Are You Sure want to delete this product ? ");
-			if (!answer) return;
+			// Bug Fix: Added a more responsive way to delete product
+			if (!window.confirm("Are you sure you want to delete this product?")) return;
 			const { data } = await axios.delete(`/api/v1/product/delete-product/${id}`);
 			toast.success("Product Deleted Successfully");
 			navigate("/dashboard/admin/products");
@@ -185,7 +227,7 @@ const UpdateProduct = () => {
 									value={price}
 									placeholder="write a Price"
 									className="form-control"
-									onChange={(e) => setPrice(e.target.value)}
+									onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
 								/>
 							</div>
 							<div className="mb-3">
@@ -194,7 +236,7 @@ const UpdateProduct = () => {
 									value={quantity}
 									placeholder="write a quantity"
 									className="form-control"
-									onChange={(e) => setQuantity(e.target.value)}
+									onChange={(e) => setQuantity(e.target.value === "" ? "" : Number(e.target.value))}
 								/>
 							</div>
 							<div className="mb-3">
@@ -208,7 +250,6 @@ const UpdateProduct = () => {
 									onChange={(value) => {
 										setShipping(value);
 									}}
-									value={shipping === "1" ? "Yes" : "No"}
 								>
 									<Option value="0">No</Option>
 									<Option value="1">Yes</Option>

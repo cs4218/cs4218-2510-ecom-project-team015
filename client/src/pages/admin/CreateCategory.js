@@ -42,7 +42,7 @@ const CreateCategory = () => {
 				setName(""); // Bug Fix: Clear the input field after successful creation
 				getAllCategory();
 			} else {
-				toast.error(data.message || "Create failed");
+				toast.error(data.message);
 			}
 		} catch (error) {
 			console.log(error);
@@ -74,8 +74,8 @@ const CreateCategory = () => {
 	}, []);
 
 	//update category
-  // Bug Fix: Corrected handleUpdate function to properly handle update logic and errors
-  // such as when the name is blank or already exists
+	// Bug Fix: Corrected handleUpdate function to properly handle update logic and errors
+	// such as when the name is blank or already exists
 	const handleUpdate = async (e) => {
 		e.preventDefault();
 		const trimmed = updatedName.trim();
@@ -102,7 +102,7 @@ const CreateCategory = () => {
 				setVisible(false);
 				getAllCategory();
 			} else {
-				toast.error(data.message || "Update failed");
+				toast.error(data.message);
 			}
 		} catch (error) {
 			// Bug Fix: Corrected spelling mistake in error message

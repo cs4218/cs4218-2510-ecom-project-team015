@@ -189,10 +189,8 @@ export const updateProductController = async (req, res) => {
 			case quantity == null || quantity === "":
 				return res.status(500).send({ error: "Quantity is Required" });
 			// Bug Fix: Corrected error handling for images and fixed typos
-			case !photo:
-				return res.status(500).send({ error: "Photo is required" });
-			case photo.size > 1000000:
-				return res.status(500).send({ error: "Photo should be less than 1MB" });
+			case photo && photo.size > 1000000:
+				return res.status(500).send({ error: "Photo is required and should be less than 1MB" });
 		}
 
 		// Bug Fix: We want to ensure price and quantity are valid numbers within acceptable ranges
