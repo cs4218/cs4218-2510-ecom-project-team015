@@ -12,6 +12,9 @@ import axios from "axios";
 
 // ---- Mocks ----
 
+// Mock axios
+jest.mock("axios");
+
 // Mock react-router: useParams (slug) + useNavigate
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -31,8 +34,6 @@ jest.mock("../components/Layout", () => ({
 	),
 }));
 
-// Mock axios
-jest.mock("axios");
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -175,4 +176,68 @@ describe("CategoryProduct", () => {
 
 		logSpy.mockRestore();
 	});
+
+
+	//made using ChatGPT
+	test("re-fetches when slug changes", async () => {
+		const { useParams } = jest.requireMock("react-router-dom");
+
+		// First slug
+		useParams.mockReturnValue({ slug: "laptops" });
+		axios.get.mockResolvedValueOnce({
+			data: {
+				category: { _id: "c1", name: "Laptops" },
+				products: [
+					{ _id: "p1", name: "A", description: "", price: 1, slug: "a" },
+				],
+			},
+		});
+
+		const { rerender } = render(<CategoryProduct />);
+		expect(
+			await screen.findByText(/Category\s*-\s*Laptops/i)
+		).toBeInTheDocument();
+		expect(axios.get).toHaveBeenCalledWith(
+			"/api/v1/product/product-category/laptops"
+		);
+
+		// Change slug -> second fetch
+		useParams.mockReturnValue({ slug: "tablets" });
+		axios.get.mockResolvedValueOnce({
+			data: {
+				category: { _id: "c2", name: "Tablets" },
+				products: [
+					{ _id: "p2", name: "B", description: "", price: 2, slug: "b" },
+				],
+			},
+		});
+
+		rerender(<CategoryProduct />);
+		expect(
+			await screen.findByText(/Category\s*-\s*Tablets/i)
+		).toBeInTheDocument();
+		expect(axios.get).toHaveBeenCalledWith(
+			"/api/v1/product/product-category/tablets"
+		);
+	});
+
+
+	//made using ChatGPT
+	test("handles undefined category/products without crashing", async () => {
+		const { useParams } = jest.requireMock("react-router-dom");
+		useParams.mockReturnValue({ slug: "misc" });
+
+		axios.get.mockResolvedValueOnce({
+			data: { category: undefined, products: undefined },
+		});
+
+		render(<CategoryProduct />);
+
+		// Header renders with no name, count is undefined/0-ish but component stays stable
+		expect(await screen.findByText(/Category\s*-\s*/i)).toBeInTheDocument();
+		// No product name headings
+		expect(screen.queryByRole("heading", { level: 5, name: /.+/ })).toBeNull();
+	});
+
+
 });
