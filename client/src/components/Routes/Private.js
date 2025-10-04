@@ -7,8 +7,8 @@ import axios from 'axios';
 import Spinner from "../Spinner";
 
 export default function PrivateRoute(){
-    const [ok,setOk] = useState(false)
-    const [auth,setAuth] = useAuth()
+    const [ok,setOk] = useState(false);
+    const [auth,setAuth] = useAuth();
 
     // This useEffect hook sends api call to backend to check if 
     useEffect(()=> {

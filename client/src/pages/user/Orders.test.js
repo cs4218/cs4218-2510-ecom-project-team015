@@ -14,7 +14,16 @@ jest.mock("axios");
 jest.mock("../../context/auth");
 jest.mock("../../context/cart");
 jest.mock("../../context/search");
-jest.mock("react-hot-toast");
+jest.mock("react-hot-toast", () => ({
+    toast: {
+        success: jest.fn(),
+        error: jest.fn(),
+    },
+}));
+jest.mock("../../components/Layout", () => ({ children }) => (
+  <div data-testid="mock-layout">{children}</div>
+));
+
 
 describe("When rendering orders page", () => {
     beforeEach(() => {
