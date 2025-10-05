@@ -168,12 +168,9 @@ describe("Given user model", () => {
         await expect(duplicateEmail.save()).rejects.toThrow(/duplicate key/);
     })
 
-    const invalidDOBs = [
-        new Date(Date.now()),                   // today
-        new Date(Date.now() - 120 * 365.25 * 24 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000), // 120 years, 1 day old
-    ];
-    test.each(invalidDOBs)("Should reject invalid DOB: %s", async(invalidDob) => {
-        const invalidDobDateOnlyString = invalidDob.toISOString().split("T")[0];
+    test("Should reject user with DOB < 1 day", async () => {
+        const tooYoung = new Date(Date.now());
+        const invalidDobDateOnlyString = tooYoung.toISOString().split("T")[0];
         const invalidUser = new userModel({
             name: "validName",
             email: "valid@mail.com",
@@ -186,14 +183,24 @@ describe("Given user model", () => {
         expect(invalidUser.save()).rejects.toThrowError(/DOB/);
     });
 
+    test("Should reject user with DOB > 120 yrs", async () => {
+        const tooOld = new Date(Date.now() - 120 * 365.25 * 24 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000); // 120 years, 1 day old
+        const invalidDobDateOnlyString = tooOld.toISOString().split("T")[0];
+        const invalidUser = new userModel({
+            name: "validName",
+            email: "valid@mail.com",
+            password: "password",
+            phone: "65382738",
+            address: "NUS",
+            DOB: new Date(`${invalidDobDateOnlyString}T00:00:00:000Z`),
+            answer: "Soccer"
+        });
+        expect(invalidUser.save()).rejects.toThrowError(/DOB/);
+    });
 
-    const validDOBs = [
-        new Date(Date.now() - 24 * 60 * 60 * 1000), //1 day old, prints time in UTC
-        new Date(Date.now() - 120 * 365.25 * 24 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000), // 119 years, 364 days old, UTC
-    ]
-
-    test.each(validDOBs)("Should accept valid DOB: %s", async(validDob) => {
-        const validDobDateOnlyString = validDob.toISOString().split("T")[0];
+    test("Should accept valid DOB of 1 day old", async() => {
+        const acceptedAge = new Date(Date.now() - 24 * 60 * 60 * 1000); //1 day old, prints time in UTC;
+        const validDobDateOnlyString = acceptedAge.toISOString().split("T")[0];
         const validUser = new userModel({
             name: "validName",
             email: "valid@mail.com",
@@ -215,4 +222,27 @@ describe("Given user model", () => {
         expect(savedUser.role).toBe(0); // not admin by default
     });
 
+    test("Should accept valid DOB of 119 yrs old and 364 days", async() => {
+        const acceptedAge = new Date(Date.now() - 120 * 365.25 * 24 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000); // 119 years, 364 days old, UTC
+        const validDobDateOnlyString = acceptedAge.toISOString().split("T")[0];
+        const validUser = new userModel({
+            name: "validName",
+            email: "valid@mail.com",
+            password: "password",
+            phone: "65382738",
+            address: "NUS",
+            DOB: new Date(`${validDobDateOnlyString}T00:00:00.000Z`),
+            answer: "Soccer"
+        });
+        const savedUser = await validUser.save();
+
+        expect(savedUser._id).toBeDefined();
+        expect(savedUser.name).toBe("validName");
+        expect(savedUser.email).toBe("valid@mail.com");
+        expect(savedUser.phone).toBe("65382738");
+        expect(savedUser.address).toBe("NUS");
+        expect(savedUser.DOB.toISOString().split("T")[0]).toEqual(validDobDateOnlyString);
+        expect(savedUser.answer).toBe("Soccer");
+        expect(savedUser.role).toBe(0); // not admin by default
+    });
 });

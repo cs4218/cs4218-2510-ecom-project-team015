@@ -26,6 +26,30 @@ describe("testing dashboard page", () => {
         jest.clearAllMocks();
     });
 
+    test('userMenu component is included in dashboard', () => {
+      useAuth.mockReturnValue([{ user: {name: 'randomName', email: 'randomEmail@email.com', address: 'random address'}, token: "valid-token" }, jest.fn()]);
+        render(
+           <MemoryRouter>
+                <Dashboard />
+           </MemoryRouter>
+        );
+        const userMenu = screen.getByTestId("mock-user-menu");
+        expect(userMenu).toBeInTheDocument();
+        expect(userMenu).toHaveTextContent("Mocked User Menu");
+
+    });
+
+    test('layout component is included in dashboard', () => {
+      useAuth.mockReturnValue([{ user: {name: 'randomName', email: 'randomEmail@email.com', address: 'random address'}, token: "valid-token" }, jest.fn()]);
+        render(
+           <MemoryRouter>
+                <Dashboard />
+           </MemoryRouter>
+        );
+        const layout = screen.getByTestId("mock-layout");
+        expect(layout).toBeInTheDocument();
+    });
+
     test('when user is available', () => {
         useAuth.mockReturnValue([{ user: {name: 'randomName', email: 'randomEmail@email.com', address: 'random address'}, token: "valid-token" }, jest.fn()]);
         render(
