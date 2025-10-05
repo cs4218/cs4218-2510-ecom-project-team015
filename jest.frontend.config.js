@@ -25,9 +25,12 @@ export default {
 		"<rootDir>/client/src/pages/Auth/Register.test.js",
 		//"<rootDir>/client/src/pages/admin/*.test.js",
 		"<rootDir>/client/src/pages/user/*.test.js",
+		"<rootDir>/client/src/pages/Categories.test.js",
 		"<rootDir>/client/src/pages/About.test.js",
 		"<rootDir>/client/src/pages/Pagenotfound.test.js",
+		"<rootDir>/client/src/pages/CartPage.test.js",
 		"<rootDir>/client/src/context/auth.test.js",
+		"<rootDir>/client/src/context/cart.test.js",
 		"<rootDir>/client/src/components/Routes/*.test.js",
 		"<rootDir>/client/src/components/Form/*.test.js",
 		"<rootDir>/client/src/components/*.test.js",
@@ -36,6 +39,7 @@ export default {
 		"<rootDir>/client/src/context/search.test.js",
 		"<rootDir>/client/src/pages/ProductDetails.test.js",
 		"<rootDir>/client/src/pages/CategoryProduct.test.js",
+		"<rootDir>/client/src/hooks/*.test.js",
 
 	],
 
@@ -51,6 +55,7 @@ export default {
 		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
 		"!client/src/pages/user/Profile.js", // Excluded as not completed
 		"client/src/context/auth.js",
+		"client/src/context/cart.js",
 		"client/src/components/Routes/Private.js",
 		"client/src/components/AdminMenu.js",
 		"client/src/components/Footer.js",
@@ -64,6 +69,9 @@ export default {
 		"client/src/components/Form/**",
 		"client/src/pages/ProductDetails.js",
 		"client/src/pages/CategoryProduct.js",
+		"client/src/pages/Categories.js",
+		"client/src/pages/CartPage.js",
+		"client/src/hooks/*.js",
 	],
 	coverageThreshold: {
 		global: {

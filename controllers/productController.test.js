@@ -2,10 +2,28 @@ import {
 	createProductController,
 	updateProductController,
 	deleteProductController,
+	braintreeTokenController,
+	brainTreePaymentController,
 } from "./productController.js";
-import { BraintreeGateway, Environment } from "braintree";
+import { __mockGateway, __mockGenerate } from "braintree";
 import dotenv from "dotenv";
 import fs from "fs";
+
+jest.mock("../models/orderModel.js", () => {
+    const mockSave = jest.fn();
+    const MockOrder = function (doc) {
+        this.doc = doc;
+        this.save = mockSave;
+    };
+    return {
+        __esModule: true,
+        default: MockOrder,
+        __mockSave: mockSave,
+    };
+});
+
+import orderModel from "../models/orderModel.js";
+import { __mockSave as mockOrderModelSave } from "../models/orderModel.js";
 
 jest.mock("slugify", () => ({
 	__esModule: true,
@@ -27,17 +45,26 @@ jest.mock("fs", () => {
 	};
 });
 
-// Mock Created using ChatGPT
-jest.mock("braintree", () => ({
-	__esModule: true,
-	default: {
-		BraintreeGateway: jest.fn().mockImplementation(() => ({})),
-		Environment: { Sandbox: "sandbox" },
-	},
-}));
+jest.mock("braintree", () => {
+	const mockGenerate = jest.fn();
+	const mockTransactionSale = jest.fn();
+	const mockGateway = {
+		clientToken: { generate: mockGenerate },
+		transaction: { sale: mockTransactionSale }
+	};
+	
+	return {
+		__esModule: true,
+		default: {
+			BraintreeGateway: jest.fn(() => mockGateway),
+			Environment: { Sandbox: "sandbox" }
+		},
+		__mockGateway: mockGateway,
+		__mockGenerate: mockGenerate
+	};
+});
 
 jest.mock("../models/categoryModel.js", () => ({ __esModule: true, default: {} }));
-jest.mock("../models/orderModel.js", () => ({ __esModule: true, default: {} }));
 
 jest.mock("../models/productModel.js", () => {
 	const save = jest.fn();
@@ -63,9 +90,11 @@ jest.mock("../models/productModel.js", () => {
 import { __mockFns } from "../models/productModel.js";
 const { save, findByIdAndUpdate, findByIdAndDelete } = __mockFns;
 
+
 const makeRes = () => ({
 	status: jest.fn().mockReturnThis(),
 	send: jest.fn(),
+	json: jest.fn(),
 	end: jest.fn(),
 });
 
@@ -705,6 +734,438 @@ describe("productController Component", () => {
 				error: error,
 			});
 			expect(logSpy).toHaveBeenCalled();
+		});
+	});
+
+	describe("braintreeTokenController", () => {
+
+		describe("Successful token generation", () => {
+			it("should generate and send client token when gateway responds successfully", async () => {
+				const req = {};
+				const res = makeRes();
+				const mockResponse = {
+					clientToken: "fake_client_token_12345",
+				};
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(null, mockResponse);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(__mockGenerate).toHaveBeenCalledTimes(1);
+				expect(__mockGenerate).toHaveBeenCalledWith({}, expect.any(Function));
+				expect(res.send).toHaveBeenCalledWith(mockResponse);
+				expect(res.send).toHaveBeenCalledWith(
+					expect.objectContaining({
+						clientToken: "fake_client_token_12345",
+					})
+				);
+			});
+		});
+
+		describe("Error handling", () => {
+			it("should send status 500 with error when gateway.clientToken.generate fails", async () => {
+				const req = {};
+				const res = makeRes();
+				const mockError = new Error("Gateway connection failed");
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(mockError, null);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(__mockGenerate).toHaveBeenCalledTimes(1);
+				expect(res.status).toHaveBeenCalledWith(500);
+				expect(res.send).toHaveBeenCalledWith(mockError);
+			});
+
+			it("should send status 500 with error message when gateway returns error object", async () => {
+				const req = {};
+				const res = makeRes();
+				const mockError = {
+					message: "Invalid credentials",
+					type: "authenticationError",
+				};
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(mockError, null);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(res.status).toHaveBeenCalledWith(500);
+				expect(res.send).toHaveBeenCalledWith(mockError);
+				expect(res.send).toHaveBeenCalledWith(
+					expect.objectContaining({
+						message: "Invalid credentials",
+						type: "authenticationError",
+					})
+				);
+			});
+
+			it("should handle network timeout errors from gateway", async () => {
+				const req = {};
+				const res = makeRes();
+				const timeoutError = new Error("Request timeout");
+				timeoutError.code = "ETIMEDOUT";
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(timeoutError, null);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(res.status).toHaveBeenCalledWith(500);
+				expect(res.send).toHaveBeenCalledWith(timeoutError);
+			});
+		});
+
+		describe("Edge cases and boundary conditions", () => {
+			it("should handle when gateway returns null response with no error", async () => {
+				const req = {};
+				const res = makeRes();
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(null, null);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(res.send).toHaveBeenCalledWith(null);
+				expect(res.status).not.toHaveBeenCalled();
+			});
+
+			it("should handle when gateway returns undefined response with no error", async () => {
+				const req = {};
+				const res = makeRes();
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(null, undefined);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(res.send).toHaveBeenCalledWith(undefined);
+				expect(res.status).not.toHaveBeenCalled();
+			});
+
+			it("should handle when gateway returns empty object", async () => {
+				const req = {};
+				const res = makeRes();
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(null, {});
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(res.send).toHaveBeenCalledWith({});
+				expect(res.status).not.toHaveBeenCalled();
+			});
+		});
+
+		describe("Exception handling in try-catch block", () => {
+			it("should log error when an unexpected exception occurs in try block", async () => {
+				const req = {};
+				const res = makeRes();
+				const unexpectedError = new Error("Unexpected error");
+
+				__mockGenerate.mockImplementation(() => {
+					throw unexpectedError;
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(logSpy).toHaveBeenCalledWith(unexpectedError);
+			});
+		});
+
+		describe("Request object validation", () => {
+			
+			it("should ignore request data and always pass empty options to gateway", async () => {
+				const req = {
+					params: { id: "123" },
+					body: { someData: "value" },
+					query: { filter: "active" },
+				};
+				const res = makeRes();
+				const mockResponse = { clientToken: "token_123" };
+
+				__mockGenerate.mockImplementation((options, callback) => {
+					callback(null, mockResponse);
+				});
+
+				await braintreeTokenController(req, res);
+
+				expect(res.send).toHaveBeenCalledWith(mockResponse);
+				expect(__mockGenerate).toHaveBeenCalledWith({}, expect.any(Function));
+			});
+		});
+	});
+
+	describe("brainTreePaymentController", () => {
+
+		beforeEach(() => {
+			mockOrderModelSave.mockClear();
+			__mockGateway.transaction.sale.mockClear();
+		});
+
+		it("should successfully process payment and create order when all data is valid", async () => {
+			const cart = [
+				{ _id: "prod1", name: "Laptop", price: 999.99 },
+				{ _id: "prod2", name: "Mouse", price: 29.99 },
+			];
+
+			const req = {
+				body: {
+					nonce: "fake-valid-nonce",
+					cart: cart,
+				},
+				user: { _id: "buyer123" },
+			};
+			const res = makeRes();
+
+			const paymentResult = {
+				success: true,
+				id: "transaction123",
+				amount: "1029.98",
+			};
+
+			__mockGateway.transaction.sale.mockImplementation((options, callback) => {
+				callback(null, paymentResult);
+			});
+
+			mockOrderModelSave.mockResolvedValue({
+				_id: "order123",
+				products: cart,
+				payment: paymentResult,
+				buyer: "buyer123",
+			});
+
+			await brainTreePaymentController(req, res);
+
+			expect(__mockGateway.transaction.sale).toHaveBeenCalledWith(
+				{
+					amount: 1029.98,
+					paymentMethodNonce: "fake-valid-nonce",
+					options: {
+						submitForSettlement: true,
+					},
+				},
+				expect.any(Function)
+			);
+
+			expect(mockOrderModelSave).toHaveBeenCalledTimes(1);
+			expect(res.json).toHaveBeenCalledWith({ ok: true });
+			expect(res.status).not.toHaveBeenCalled(); 
+		});
+
+	
+		it("should send status 400 when nonce is missing", async () => {
+			const req = {
+				body: {
+					cart: [{ price: 100 }],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			await brainTreePaymentController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.send).toHaveBeenCalledWith({ error: "Nonce required" });
+			expect(__mockGateway.transaction.sale).not.toHaveBeenCalled();
+			expect(mockOrderModelSave).not.toHaveBeenCalled();
+		});
+
+		it("should send status 500 when payment gateway returns error", async () => {
+			const req = {
+				body: {
+					nonce: "invalid-nonce",
+					cart: [{ price: 100 }],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			const gatewayError = new Error("Payment declined - insufficient funds");
+
+			__mockGateway.transaction.sale.mockImplementation((options, callback) => {
+				callback(gatewayError, null);
+			});
+
+		
+			await brainTreePaymentController(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith(
+				expect.objectContaining({
+					success: false,
+					message: "Error processing payment",
+					error: "Payment declined - insufficient funds",
+				})
+			);
+
+			expect(mockOrderModelSave).not.toHaveBeenCalled();
+		});
+
+		it("should send status 500 when order save fails after successful payment", async () => {
+	
+			const req = {
+				body: {
+					nonce: "valid-nonce",
+					cart: [{ price: 100 }],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			const saveError = new Error("Database connection failed");
+
+			__mockGateway.transaction.sale.mockImplementation((options, callback) => {
+				callback(null, { success: true, id: "txn123" });
+			});
+
+			mockOrderModelSave.mockRejectedValue(saveError);
+
+			await brainTreePaymentController(req, res);
+
+			expect(__mockGateway.transaction.sale).toHaveBeenCalled();
+
+			expect(mockOrderModelSave).toHaveBeenCalled();
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith(
+				expect.objectContaining({
+					success: false,
+					message: "Error processing payment",
+					error: "Database connection failed",
+				})
+			);
+
+			expect(res.json).not.toHaveBeenCalled();
+
+			expect(logSpy).toHaveBeenCalledWith(saveError);
+		});
+
+		it("should calculate correct total for multiple cart items with decimal prices", async () => {
+			const req = {
+				body: {
+					nonce: "nonce-123",
+					cart: [
+						{ price: 10.99 },
+						{ price: 20.50 },
+						{ price: 5.75 },
+					],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			__mockGateway.transaction.sale.mockImplementation((options, callback) => {
+				callback(null, { success: true });
+			});
+
+			mockOrderModelSave.mockResolvedValue({ _id: "order123" });
+
+		
+			await brainTreePaymentController(req, res);
+
+			const callArgs = __mockGateway.transaction.sale.mock.calls[0][0];
+
+			// Total should be 37.24 (10.99 + 20.50 + 5.75)
+			expect(callArgs.amount).toBeCloseTo(37.24, 2);
+		});
+
+		it("should only send success response after order is successfully saved", async () => {
+			const req = {
+				body: {
+					nonce: "nonce-123",
+					cart: [{ price: 100 }],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			let saveResolved = false;
+
+			__mockGateway.transaction.sale.mockImplementation((options, callback) => {
+				callback(null, { success: true });
+			});
+
+			mockOrderModelSave.mockImplementation(() => {
+				return new Promise(resolve => {
+					setTimeout(() => {
+						saveResolved = true;
+						resolve({ _id: "order123" });
+					}, 20);
+				});
+			});
+
+			await brainTreePaymentController(req, res);
+
+			expect(saveResolved).toBe(true);
+			expect(res.json).toHaveBeenCalledWith({ ok: true });
+		});
+
+		it("should handle minimum valid price (0.01)", async () => {
+
+			const req = {
+				body: {
+					nonce: "nonce-123",
+					cart: [{ price: 0.01 }],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			__mockGateway.transaction.sale.mockImplementation((options, callback) => {
+				callback(null, { success: true });
+			});
+
+			mockOrderModelSave.mockResolvedValue({ _id: "order123" });
+
+			await brainTreePaymentController(req, res);
+
+			expect(__mockGateway.transaction.sale).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: 0.01 }),
+				expect.any(Function)
+			);
+			expect(res.json).toHaveBeenCalledWith({ ok: true });
+		});
+
+		it("should catch and handle unexpected exceptions properly", async () => {
+			
+			const req = {
+				body: {
+					nonce: "nonce-123",
+					cart: [{ price: 100 }],
+				},
+				user: { _id: "user123" },
+			};
+			const res = makeRes();
+
+			const unexpectedError = new Error("Unexpected server error");
+
+			__mockGateway.transaction.sale.mockImplementation(() => {
+				throw unexpectedError;
+			});
+
+			await brainTreePaymentController(req, res);
+			expect(logSpy).toHaveBeenCalledWith(unexpectedError);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith(
+				expect.objectContaining({
+					success: false,
+					message: "Error processing payment",
+					error: "Unexpected server error",
+				})
+			);
+
+			expect(res.json).not.toHaveBeenCalled();
 		});
 	});
 });
