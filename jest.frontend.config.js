@@ -35,8 +35,8 @@ export default {
 		"client/src/context/**/*.js",
 		"!client/src/context/cart.js", // Excluded as it is not yet implemented
 		"client/src/pages/admin/*.js",
-		"!client/src/pages/admin/Users.js", // Excluded as it is not yet implemented
-		"client/src/pages/Auth/*.js",	
+		"client/src/pages/Auth/*.js",
+		"!client/src/pages/Auth/ForgotPassword.js", // Excluded as it is not yet implemented	
 		"client/src/pages/user/*.js",
 		"client/src/pages/*.js",
 		"!client/src/pages/CartPage.js", // Excluded as it is not yet implemented

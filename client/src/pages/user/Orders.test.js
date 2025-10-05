@@ -190,7 +190,7 @@ describe("When rendering orders page", () => {
         });
     });
 
-    test("getOrders not called when token does not exist", async() => {
+    test("axios not called when token does not exist", async() => {
         useAuth.mockReturnValue([{user: {name: "abc"}}, jest.fn()]); //token does not exist
         Orders.getOrders = jest.fn();
         render(
@@ -199,7 +199,7 @@ describe("When rendering orders page", () => {
             </MemoryRouter>
         );
 
-        expect(Orders.getOrders).not.toHaveBeenCalled();
+        expect(axios.get).not.toHaveBeenCalled();
     });
 
     test("toast message displayed if error response does not contain data", async() => {

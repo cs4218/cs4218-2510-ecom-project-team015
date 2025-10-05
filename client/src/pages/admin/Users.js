@@ -55,7 +55,7 @@ const Users = () => {
                             <td>{moment(user?.createdAt).fromNow()}</td>
                             <td>{user?.phone}</td>
                             <td>{user?.address}</td>
-                            <td>{new Date(user?.DOB).toDateString()}</td>
+                            <td>{new Date(user?.DOB).toLocaleDateString()}</td>
                           </tr>
                         ))}
                       </tbody>
