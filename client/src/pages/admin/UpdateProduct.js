@@ -63,6 +63,7 @@ const UpdateProduct = () => {
 	const isBlank = (s) => !String(s).trim();
 
 	//create product function
+	// Bug Fix: Added checks to validate the input fields
 	const handleUpdate = async (e) => {
 		e.preventDefault();
 		try {

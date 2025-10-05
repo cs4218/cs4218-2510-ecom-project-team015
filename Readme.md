@@ -1,5 +1,18 @@
 # CS4218 Project - Virtual Vault
 
+[![CI Status](https://img.shields.io/badge/CI-Link-brightgreen)](https://github.com/cs4218/cs4218-2510-ecom-project-team015/actions/runs/18257276719/job/51980387829)
+
+## Project Contributions
+| Name | Client Related Files (/client/src/) | Server Related Files (./) | Remarks |
+| :---- | :---- | :---- | :---- |
+| ADHITYA GOPALAKRISHNAN | <ul><li>Private.js</li><li>UserMenu.js</li><li>Dashboard.js</li><li>Orders.js</li><li>Profile.js</li><li>Users.js</li><li>HomePage.js <ul><li>getTotal</li><li>loadMore</li><li>handleFilter</li></ul></li><ul> | <ul><li>userModel.js</li><li>orderModel.js</li><li>controllers/authController.js<ul><li>updateProfileController</li><li>getOrdersController</li><li>getAllOrdersController</li><li>orderStatusController</li><li>getAllUsersController</li></ul></li></ul> | I have used ChatGPT for some of the mocks and to generate tests. I have specified it near the code where applicable. |
+| RAVI KISHORE | <ul><li>auth.js</li><li>Register.js</li><li>Login.js</li><li>ForgotPassword.js</li><li>Contact.js</li><li>Policy.js</li><li>HomePage.js<ul><li>getAllCategory</li><li>getAllProducts</li></ul></li></ul> | <ul><li>authHelper.js</li><li>authMiddleware.js</li><li>authController.js<ul><li>registerContoller</li><li>loginController</li><li>forgotPasswordController</li><li>testController</li></ul></li></ul> | I have used ChatGPT to debug, generate and brainstorm for some test cases. |
+| SINHA VEDANT | <ul><li>components/Footer.js</li><li>components/Header.js</li><li>components/Layout.js</li><li>components/Spinner.js</li><li>pages/About.js</li><li>pages/Pagenotfound.js</li><li>context/cart.js</li><li>CartPage.js</li><li>hooks/useCategory.js</li><li>pages/Categories.js</li></ul> | <ul><li>config/db.js</li><li>models/categoryModel.js</li><li>controllers/categoryController.js<ul><li>categoryControlller</li><li>singleCategoryController</li></ul><li>controllers/productController.js<ul><li>braintreeTokenController</li><li>braintreePaymentController</li></ul> | I have used ChatGPT and Claude to generate/edit/debug my test cases. I have mentioned the use of AI at line number 1 of each testfile I wrote. |
+| TRAN ANH KHOA |  |  |  |
+| UJJWAL GAURAV | <ul><li>AdminMenu.js</li><li>AdminDashboard.js</li><li>AdminOrders.js</li><li>Products.js</li><li>CategoryForm.js</li><li>CreateCategory.js</li><li>CreateProduct.js</li><li>UpdateProduct.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>createCategoryController</li><li>updateCategoryController</li><li>deleteCategoryController</li></ul><li>controllers/productController.js<ul><li>createProductController</li><li>updateProductController</li><li>deleteProductController</li></ul> | I used ChatGPT for some of the components for writing tests, stubs, and mocks. I’ve mentioned the use of ChatGPT in these components in a comment above each code written by AI.  |
+
+
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.

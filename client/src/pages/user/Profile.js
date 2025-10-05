@@ -43,7 +43,7 @@ const Profile = () => {
     }
     catch (error) {
       console.log(error);
-      toast.error(error.response.data.message) || "Something went wrong"; 
+      toast.error(error.response?.data?.message || "Something went wrong") ; 
     }
   };
   return (
@@ -72,7 +72,6 @@ const Profile = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
                     id="exampleEmailInput"
                     placeholder="Enter Your Email"

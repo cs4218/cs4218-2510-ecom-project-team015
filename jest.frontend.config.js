@@ -24,6 +24,7 @@ export default {
 		"<rootDir>/client/src/components/**/*.test.js",
 		"<rootDir>/client/src/context/**/*.test.js",
 		"<rootDir>/client/src/pages/**/*.test.js",
+		"<rootDir>/client/src/hooks/*.test.js",
 	],
 
 	// jest code coverage
@@ -33,14 +34,8 @@ export default {
 		"!client/src/components/Prices.js", // Excluded as it is not required
 		"!client/src/components/Routes/AdminRoute.js", // Excluded as it is not required
 		"client/src/context/**/*.js",
-		"!client/src/context/cart.js", // Excluded as it is not yet implemented
-		"client/src/pages/admin/*.js",
-		"client/src/pages/Auth/*.js",
-		"!client/src/pages/Auth/ForgotPassword.js", // Excluded as it is not yet implemented	
-		"client/src/pages/user/*.js",
-		"client/src/pages/*.js",
-		"!client/src/pages/CartPage.js", // Excluded as it is not yet implemented
-		"!client/src/pages/Categories.js", // Excluded as it is not yet implemented
+		"client/src/hooks/*.js",
+		"client/src/pages/**/*.js",
 		"!client/src/pages/HomePage.js", // Excluded as it is not yet implemented
 	],
 	coverageThreshold: {

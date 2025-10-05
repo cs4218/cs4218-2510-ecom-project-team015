@@ -1,3 +1,4 @@
+// These test cases have been written with the help of ChatGPT.
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import About from "./About";

@@ -1,3 +1,4 @@
+// These tests have been written with the help of ChatGPT
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -5,7 +6,6 @@ import "@testing-library/jest-dom";
 import toast from "react-hot-toast";
 import Header from "./Header";
 
-// Context & hooks
 jest.mock("../context/auth", () => ({
   useAuth: jest.fn(),
 }));
@@ -16,7 +16,6 @@ jest.mock("../context/cart", () => ({
 
 jest.mock("../hooks/useCategory", () => jest.fn());
 
-// ✅ Mock useSearch because Header → SearchInput uses it
 jest.mock("../context/search", () => ({
   useSearch: jest.fn(),
 }));
@@ -26,11 +25,10 @@ jest.mock("react-hot-toast");
 describe("Header Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Always provide a safe mock for useSearch
     const { useSearch } = require("../context/search");
     useSearch.mockReturnValue([
-      { keyword: "", results: [] }, // values
-      jest.fn(), // setValues
+      { keyword: "", results: [] }, 
+      jest.fn(), 
     ]);
   });
 
@@ -95,6 +93,32 @@ describe("Header Component", () => {
     expect(getByText("Logout")).toBeInTheDocument();
   });
 
+  it("renders Dashboard link with 'admin' path when user has role 1 (admin)", () => {
+
+    const { useAuth } = require("../context/auth");
+    const { useCart } = require("../context/cart");
+    const useCategory = require("../hooks/useCategory");
+
+    useAuth.mockReturnValue([
+      { user: { name: "Admin User", role: 1 }, token: "adminToken" },
+      jest.fn(),
+    ]);
+    useCart.mockReturnValue([[], jest.fn()]);
+    useCategory.mockReturnValue([]);
+
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
+
+
+    const dashboardLink = getByText("Dashboard");
+    expect(dashboardLink).toBeInTheDocument();
+    expect(dashboardLink).toHaveAttribute("href", "/dashboard/admin");
+  });
+
   it("renders categories from useCategory hook", () => {
     const { useAuth } = require("../context/auth");
     const { useCart } = require("../context/cart");
@@ -119,7 +143,6 @@ describe("Header Component", () => {
     const { useCart } = require("../context/cart");
     const useCategory = require("../hooks/useCategory");
 
-    // Mock auth with a logged-in user
     useAuth.mockReturnValue([
       { user: { name: "Jane Doe", role: 0 }, token: "mockToken" },
       setAuth,
@@ -127,7 +150,7 @@ describe("Header Component", () => {
     useCart.mockReturnValue([[], jest.fn()]);
     useCategory.mockReturnValue([]);
 
-    // Mock localStorage.removeItem so we can assert on it
+    
     Storage.prototype.removeItem = jest.fn();
 
     const { getByText } = render(
