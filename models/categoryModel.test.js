@@ -1,3 +1,4 @@
+// These tests have been written with the help of Claude.
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import Category from "../models/categoryModel";
