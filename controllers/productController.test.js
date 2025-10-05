@@ -1002,7 +1002,7 @@ describe("productFiltersController", () => {
 		expect(res.status).toHaveBeenCalledWith(200);
 	});
 
-	it("lỗi -> 400", async () => {
+	it("error -> 400", async () => {
 		find.mockRejectedValue(new Error("db"));
 		const res = makeRes();
 
@@ -1028,7 +1028,7 @@ describe("productCountController", () => {
 		expect(res.send).toHaveBeenCalledWith({ success: true, total: 42 });
 	});
 
-	it("lỗi -> 400", async () => {
+	it("error -> 400", async () => {
 		const c = chain({
 			estimatedDocumentCount: jest.fn().mockRejectedValue(new Error("db")),
 		});
@@ -1059,7 +1059,7 @@ describe("productListController", () => {
 		expect(res.send).toHaveBeenCalledWith({ success: true, products: data });
 	});
 
-	it("lỗi -> 400", async () => {
+	it("error -> 400", async () => {
 		const c = chain({ sort: jest.fn().mockRejectedValue(new Error("db")) });
 		find.mockReturnValue(c);
 		const res = makeRes();
@@ -1089,7 +1089,7 @@ describe("searchProductController", () => {
 		expect(res.json).toHaveBeenCalledWith(results);
 	});
 
-	it("lỗi -> 400", async () => {
+	it("error -> 400", async () => {
 		const c = chain({ select: jest.fn().mockRejectedValue(new Error("db")) });
 		find.mockReturnValue(c);
 		const res = makeRes();
@@ -1118,7 +1118,7 @@ describe("realtedProductController", () => {
 		expect(res.send).toHaveBeenCalledWith({ success: true, products: list });
 	});
 
-	it("lỗi -> 400", async () => {
+	it("error -> 400", async () => {
 		const c3 = chain({
 			populate: jest.fn().mockRejectedValue(new Error("db")),
 		});
