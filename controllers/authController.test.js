@@ -682,6 +682,50 @@ describe("When testing getOrdersController", () => {
         expect(res.json).toHaveBeenCalledWith(mockedOrder);
     });
 
+    it("should return an empty array when no orders are found", async () => {
+        const mockPopulate = jest.fn().mockReturnThis();
+        const fakeQuery = {
+            populate: mockPopulate,
+            then: (resolve) => resolve([]),
+        };
+        orderModel.find = jest.fn(() => fakeQuery);
+
+        await getOrdersController(req, res);
+
+        expect(orderModel.find).toHaveBeenCalledWith({ buyer: "userId" });
+        expect(res.json).toHaveBeenCalledWith([]);
+    });
+
+    // Generated with ChatGPT
+    it("should return multiple orders when found", async () => {
+        const mockedOrders = [
+            {
+                _id: "order1",
+                buyer: { _id: "userId", name: "mockedUser" },
+                products: [{ _id: "prod1", name: "Shirt" }],
+                status: "Processed"
+            },
+            {
+                _id: "order2",
+                buyer: { _id: "userId", name: "mockedUser" },
+                products: [{ _id: "prod2", name: "Shoes" }],
+                status: "Shipped"
+            }
+        ];
+
+        const mockPopulate = jest.fn().mockReturnThis();
+        const fakeQuery = {
+            populate: mockPopulate,
+            then: (resolve) => resolve(mockedOrders),
+        };
+        orderModel.find = jest.fn(() => fakeQuery);
+
+        await getOrdersController(req, res);
+
+        expect(res.json).toHaveBeenCalledWith(mockedOrders);
+    });
+
+
     it("should throw error 500 with message when there is an issue with getOrdersController", async () => {
         orderModel.find = jest.fn().mockImplementation(() => { 
             throw new Error("Server error");
@@ -778,6 +822,22 @@ describe("When testing getAllOrdersController", () => {
             mockedOrder2
         ]);
     });
+
+    it("should return an empty array when no orders are found", async () => {
+        const mockPopulate = jest.fn().mockReturnThis();
+        const mockSort = jest.fn().mockReturnThis();
+        const fakeQuery = {
+            populate: mockPopulate,
+            sort: mockSort,
+            then: (resolve) => resolve([]),
+        };
+        orderModel.find = jest.fn(() => fakeQuery);
+
+        await getAllOrdersController(req, res);
+
+        expect(res.json).toHaveBeenCalledWith([]);
+    });
+
 
     it("should return error 500 response when there is an error in fetching all orders", async() => {
         orderModel.find = jest.fn().mockImplementation(() => {
@@ -896,6 +956,19 @@ describe("When testing orderStatusController", () => {
             }
         ));
     });
+
+    it("should return null if no order is found", async () => {
+        req.params = { orderId: "nonexistentId" };
+        req.body = { status: "Processed" };
+
+        //if order doesn't exist, mongoose would return null by default
+        orderModel.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+
+        await orderStatusController(req, res);
+
+        expect(res.json).toHaveBeenCalledWith(null);
+    });
+
 });
 
 // Test cases for Get All Users controller
