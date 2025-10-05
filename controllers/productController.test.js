@@ -16,7 +16,6 @@ import { BraintreeGateway, Environment } from "braintree";
 import dotenv from "dotenv";
 import fs from "fs";
 
-
 jest.mock("slugify", () => ({
 	__esModule: true,
 	default: (s) => `slug-${String(s)}`,
@@ -83,7 +82,6 @@ jest.mock("../models/productModel.js", () => {
 			save,
 			findByIdAndUpdate,
 			findByIdAndDelete,
-			// NEW:
 			find,
 			findOne,
 			findById,
@@ -116,7 +114,7 @@ afterEach(() => {
 	logSpy.mockRestore();
 });
 
-// to chain object like Mongoose query creatd with the help of chatgpt
+// to chain object like Mongoose query created with the help of chatgpt
 const chain = (overrides = {}) => {
 	const self = {};
 	self.populate = jest.fn(() => self);
@@ -530,30 +528,6 @@ describe("productController Component", () => {
 				}
 			);
 		});
-
-		// it("sends a status 500 when photo is missing", async () => {
-		// 	const req = {
-		// 		fields: {
-		// 			name: "Product",
-		// 			description: "Product is Good",
-		// 			price: 10,
-		// 			category: "Books",
-		// 			quantity: 1,
-		// 			shipping: 0,
-		// 		},
-		// 		files: {},
-		// 	};
-		// 	const res = makeRes();
-
-		// 	await updateProductController(req, res);
-
-		// 	expect(res.status).toHaveBeenCalledWith(500);
-		// 	expect(res.send).toHaveBeenCalledWith({
-		// 		error: "Photo is required",
-		// 	});
-		// 	expect(fs.readFileSync).not.toHaveBeenCalled();
-		// 	expect(findByIdAndUpdate).not.toHaveBeenCalled();
-		// });
 
 		it("sends a status 500 when photo size is greater than 1MB", async () => {
 			const req = {
