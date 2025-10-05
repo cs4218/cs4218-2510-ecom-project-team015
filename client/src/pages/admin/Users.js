@@ -17,7 +17,7 @@ const Users = () => {
       setUsers(data);
     } catch (error) {
       console.log(error);
-      toast.error(error.response?.data.message || "Error fetching all users");
+      toast.error(error.response?.data?.message || "Error fetching all users");
     }
   };
   useEffect(() => {

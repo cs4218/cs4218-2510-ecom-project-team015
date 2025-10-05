@@ -3,8 +3,6 @@ import React, { useState, useEffect } from "react";
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from "@testing-library/user-event";
 import {useAuth} from '../../context/auth';
-import userMenu from "../../components/UserMenu";
-import Layout from "./../../components/Layout";
 import toast from "react-hot-toast";
 import { MemoryRouter } from 'react-router-dom';
 import Profile from './Profile';
@@ -13,6 +11,7 @@ import Profile from './Profile';
 jest.mock('axios');
 jest.mock("../../context/auth");
 jest.mock("react-hot-toast");
+jest.mock("../../components/UserMenu");
 toast.success = jest.fn();
 toast.error = jest.fn();
 
@@ -167,6 +166,29 @@ describe("Rendering user profile page", () => {
         });
         await waitFor(() => {
             expect(toast.error).toHaveBeenLastCalledWith("Unauthorized");
+        });
+    });
+
+    test("Logs error and shows predefined error toast msg if error.response is undefined", async() => {
+        useAuth.mockReturnValue([{ token: "invalidToken", user: {name: "mockedUser" }}, jest.fn()]);   //invalid token
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+        axios.put.mockRejectedValue({});
+
+        //Act
+        render(
+            <MemoryRouter>
+                <Profile />
+            </MemoryRouter>
+        );
+
+        const updateButton = screen.getByRole("button", {name: /UPDATE/i});
+        await userEvent.click(updateButton);
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenLastCalledWith({});
+        });
+        await waitFor(() => {
+            expect(toast.error).toHaveBeenLastCalledWith("Something went wrong");
         });
     });
 });
