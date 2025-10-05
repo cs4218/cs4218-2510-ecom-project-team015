@@ -134,6 +134,25 @@ describe("Users page rendering", () => {
             expect(toast.error).toHaveBeenLastCalledWith("Unauthorized");
         });
     });
+    test("Logs error and shows predefined error toast msg if error.response is undefined", async() => {
+        useAuth.mockReturnValue([{ token: "invalidToken", user: {name: "mockedUser" }}, jest.fn()]);   //invalid token
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+        axios.get.mockRejectedValue({});
+
+        //Act
+        render(
+            <MemoryRouter>
+                <Users />
+            </MemoryRouter>
+        );
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenLastCalledWith(expect.objectContaining({}));
+        });
+        await waitFor(() => {
+            expect(toast.error).toHaveBeenLastCalledWith("Error fetching all users");
+        });
+    });
 
     test("axios not called when token does not exist", async() => {
         useAuth.mockReturnValue([{user: {name: "abc"}}, jest.fn()]); //token does not exist
