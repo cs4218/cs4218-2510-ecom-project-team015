@@ -1,4 +1,4 @@
-import { registerController, loginController, forgotPasswordController, testController } from "../controllers/authController.js";
+import { registerController, loginController, forgotPasswordController, testController, getAllUsersController } from "../controllers/authController.js";
 import { updateProfileController, getOrdersController, getAllOrdersController, orderStatusController } from "../controllers/authController.js";
 import userModel from "../models/userModel.js";
 import { hashPassword, comparePassword } from "../helpers/authHelper.js";
@@ -884,5 +884,59 @@ describe("When testing orderStatusController", () => {
                 message: "Error while fetching orders",
             }
         ));
-    })
+    });
+});
+
+// Test cases for Get All Users controller
+describe("When testing getAllUsersController", () => {
+    let req, res;
+    beforeEach(() => {
+        req = {};
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+            json: jest.fn(),
+        }
+        jest.clearAllMocks();
+    });
+
+     it("should return a json object populated when users exist", async() => {
+        const mockedUsers = [{
+            name: "userInDb",
+            email: "example@email.com",
+            password: "hashedPwd",
+            phone: "98989898",
+            address: "abc",
+            DOB: new Date("2022-12-12"),
+            answer: "answer"
+        }]
+        userModel.find = jest.fn().mockResolvedValue(mockedUsers);
+
+        //act
+        await getAllUsersController(req, res);
+
+        //assert
+        expect(userModel.find).toHaveBeenCalledWith({});
+
+        expect(res.json).toHaveBeenCalledWith(mockedUsers);
+    });
+
+    it("should return error 500 response when there is an error in fetching all users", async() => {
+        userModel.find = jest.fn().mockImplementation(() => {
+            throw new Error("Server error");
+        })
+        consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+        await getAllUsersController(req, res);
+        
+        expect(res.json).not.toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenLastCalledWith(new Error("Server error"));
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining(
+            {
+                success: false,
+                message: "Error while fetching users",
+            }
+        ));
+    });
 });
