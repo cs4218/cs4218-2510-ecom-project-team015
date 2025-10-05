@@ -85,6 +85,7 @@ const categoriesPayload = {
 	},
 };
 
+// Created using ChatGPT
 function arrangeDefaultAxios() {
 	axios.get.mockImplementation((url) => {
 		if (url.includes("/api/v1/product/get-product/")) return Promise.resolve(productPayload);
@@ -106,6 +107,7 @@ afterEach(() => {
 	consoleSpy.mockRestore();
 });
 
+// Created using ChatGPT
 const validForm = async ({
 	name = "Updated Name",
 	description = "Updated Description",
@@ -373,8 +375,6 @@ describe("UpdateProduct Component", () => {
 		expect(toast.error).toHaveBeenCalledWith("Something went wrong");
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
-
-	// in beforeEach we did: jest.spyOn(window, "confirm").mockReset();
 
 	it("deletes product after confirm", async () => {
 		axios.delete = jest.fn().mockResolvedValue({ data: { success: true } });

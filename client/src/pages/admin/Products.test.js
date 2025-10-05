@@ -13,9 +13,13 @@ jest.mock("react-hot-toast", () => ({
 }));
 
 // Layout mock
-jest.mock("../../components/Layout", () => ({
+jest.mock("./../../components/Layout", () => ({
 	__esModule: true,
-	default: ({ children }) => <div data-testid="mock-layout">{children}</div>,
+	default: ({ title, children }) => (
+		<div data-testid="mock-layout" data-title={title}>
+			{children}
+		</div>
+	),
 }));
 
 // AdminMenu mock
@@ -34,6 +38,17 @@ describe("Products Component", () => {
 	function renderWithRouter(component) {
 		return render(<MemoryRouter>{component}</MemoryRouter>);
 	}
+
+	it("renders Layout, AdminMenu, page heading and passes the correct Layout title", () => {
+		render(<Products />);
+		const layout = screen.getByTestId("mock-layout");
+		expect(layout).toBeInTheDocument();
+		expect(layout).toHaveAttribute("data-title", "Dashboard - Products");
+		expect(screen.getByTestId("mock-admin-menu")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { name: /all products list/i, level: 1 })
+		).toBeInTheDocument();
+	});
 
 	it("calls the products API and shows the Product heading", async () => {
 		axios.get.mockResolvedValueOnce({ data: { products: [] } });

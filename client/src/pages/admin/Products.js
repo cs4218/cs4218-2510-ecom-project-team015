@@ -24,7 +24,8 @@ const Products = () => {
 		getAllProducts();
 	}, []);
 	return (
-		<Layout>
+    // Bug Fix: Added Products Title
+		<Layout title="Dashboard - Products">
 			<div className="row">
 				<div className="col-md-3">
 					<AdminMenu />

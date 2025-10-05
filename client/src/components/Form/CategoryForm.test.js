@@ -32,7 +32,7 @@ describe("CategoryForm Component", () => {
 		expect(input).toHaveValue("Books");
 	});
 
-	it("calls setValue on change", () => {
+	it("calls setValue when value in the field changes", () => {
 		const handleSubmit = jest.fn();
 		const setValue = jest.fn();
 
@@ -45,7 +45,7 @@ describe("CategoryForm Component", () => {
 		expect(setValue).toHaveBeenCalledWith("Garden");
 	});
 
-	it("calls handleSubmit when the form is submitted via button click", () => {
+	it("calls handleSubmit when the form is submitted through button click", () => {
 		const handleSubmit = jest.fn((e) => e && e.preventDefault && e.preventDefault());
 		const setValue = jest.fn();
 
@@ -57,6 +57,7 @@ describe("CategoryForm Component", () => {
 		expect(handleSubmit).toHaveBeenCalledTimes(1);
 	});
 
+	// Created using ChatGPT
 	it("calls handleSubmit when pressing Enter in the input", async () => {
 		const handleSubmit = jest.fn((e) => e?.preventDefault?.());
 		const setValue = jest.fn();
