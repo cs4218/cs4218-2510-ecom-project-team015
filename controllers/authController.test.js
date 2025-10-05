@@ -383,6 +383,17 @@ describe("forgotPasswordController", () => {
         expect(res.send).toHaveBeenCalledWith({ success: false, message: "New Password is required" });
     });
 
+    it("should return error if user with given email does not exist", async () => {
+        // The request body has email, answer and new password
+        req.body = { email: "test@gmail.com", answer: "test answer", newPassword: "pass" };
+
+        await forgotPasswordController(req, res);
+
+        // Check it returns the correct status and message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "New Password must be at least 6 characters long" });
+    })
+
     it("should return error if user with given email and answer does not exist", async () => {
         // The request body has email, answer and new password
         req.body = { email: "test@gmail.com", answer: "test answer", newPassword: "password1234" };

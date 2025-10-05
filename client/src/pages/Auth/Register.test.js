@@ -68,7 +68,7 @@ describe('Register Component', () => {
 
     // To test that the user is registered successfully
     it('should register the user successfully', async () => {
-        axios.post.mockResolvedValueOnce({ data: { success: true } });
+        axios.post.mockResolvedValueOnce({ data: { success: true, message: 'Registered Successfully, please login' } });
 
         const { getByText, getByPlaceholderText } = setupRegisterPage();
 

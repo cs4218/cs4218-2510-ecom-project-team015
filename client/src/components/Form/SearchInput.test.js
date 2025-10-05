@@ -4,6 +4,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SearchInput from "./SearchInput";
 import axios from "axios";
 
+// mock axios
+jest.mock("axios");
+
 // mock useNavigate
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -18,14 +21,43 @@ jest.mock("../../context/search", () => ({
 	useSearch: () => [mockValues, mockSetValues],
 }));
 
-// mock axios
-jest.mock("axios");
 
 describe("SearchInput", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		mockValues = { keyword: "", results: [] };
 	});
+
+	test("renders input and search button", () => {
+		render(<SearchInput />);
+
+		// check input
+		const input = screen.getByPlaceholderText(/search/i);
+		expect(input).toBeInTheDocument();
+
+		// check button
+		const button = screen.getByRole("button", { name: /search/i });
+		expect(button).toBeInTheDocument();
+	});
+
+
+	test("input is empty initially", () => {
+		render(<SearchInput />);
+		const input = screen.getByPlaceholderText(/search/i);
+		expect(input.value).toBe(""); // start with empty string
+	});
+
+
+	test("submit with empty keyword still call API with empty keyword", async () => {
+		render(<SearchInput />);
+
+		fireEvent.click(screen.getByRole("button", { name: /search/i }));
+
+		await waitFor(() => {
+			expect(axios.get).toHaveBeenCalled();
+		});
+	});
+
 
 	test("type keyword + submit (simulate by pre-setting keyword): calls API with correct URL, updates setValues with results, navigates", async () => {
 		// pre-set keyword BEFORE render (mock doesn't re-render)
@@ -49,7 +81,8 @@ describe("SearchInput", () => {
 		});
 	});
 
-	test("controlled input: instead of checking displayed value, verify setValues is called correctly on typing", () => {
+
+	test("instead of checking the value that will be displayed, verify setValues is called correctly after typing", () => {
 		render(<SearchInput />);
 
 		const input = screen.getByPlaceholderText(/search/i);
@@ -62,7 +95,8 @@ describe("SearchInput", () => {
 		});
 	});
 
-	test("error branch: API rejects → logs error and does NOT navigate", async () => {
+
+	test("error branch: API rejects -> logs error and does NOT navigate", async () => {
 		mockValues = { keyword: "LAPTOP", results: [] };
 		const err = new Error("Network down");
 		axios.get.mockRejectedValueOnce(err);

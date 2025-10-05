@@ -5,8 +5,6 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import toast from 'react-hot-toast';
 import Login from './Login.js';
-import { get } from 'http';
-import { response } from 'express';
 
 // Mocking axios.post
 jest.mock('axios');
@@ -34,7 +32,7 @@ jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
   }));  
 
-jest.mock("../../hooks/useCategory", () => jest.fn(() =>[]));
+jest.mock("../../hooks/useCategory", () => jest.fn(() =>[])); // Mock useCategory to return null state and a mock function
 
 Object.defineProperty(window, 'localStorage', {
     value: {
@@ -69,7 +67,7 @@ describe('Login Component', () => {
     });
 
     it('renders login form', () => {
-		const { getByText, getByPlaceholderText } = setupLoginPage();
+		  const { getByText, getByPlaceholderText } = setupLoginPage();
     
         expect(getByText('LOGIN FORM')).toBeInTheDocument();
         expect(getByPlaceholderText('Enter Your Email')).toBeInTheDocument();
@@ -98,9 +96,9 @@ describe('Login Component', () => {
       const fakeUser = { _id: "fakeUserId", name: "Test User", email: "test@gmail.com", phone: "12345678", address: "123 Test Street", role: "0" };
       const fakeToken = "fakeToken";
       const mockData = { success: true, message: 'Login Successful', user: fakeUser, token: fakeToken };
-          axios.post.mockResolvedValueOnce({
+      axios.post.mockResolvedValueOnce({
               data: mockData
-          });
+      });
 
           const { getByPlaceholderText, getByText } = setupLoginPage();
 
@@ -117,9 +115,9 @@ describe('Login Component', () => {
                   color: 'white'
               }
         });
-		// expect(setauth)
-		expect(window.localStorage.setItem).toHaveBeenCalledWith("auth", JSON.stringify({user: fakeUser, token: fakeToken}));
-		expect(mockNavigate).toHaveBeenCalledWith("/");
+      // expect(setauth)
+      expect(window.localStorage.setItem).toHaveBeenCalledWith("auth", JSON.stringify({user: fakeUser, token: fakeToken}));
+      expect(mockNavigate).toHaveBeenCalledWith("/");
     });
 
 	  it('should show error when email is not registered', async () => {
@@ -152,11 +150,24 @@ describe('Login Component', () => {
         expect(toast.error).toHaveBeenCalledWith(mockErrorResponse.message);
     });
 
-	it('should navigate to forgot-password page on when forgot password button is clicked', async () => {
-		const { getByText } = setupLoginPage();
+    it("should display default error message if the error is not defined", async () => {
+      axios.post.mockRejectedValueOnce(new Error());
 
-		fireEvent.click(getByText('Forgot Password'));	
+      const { getByPlaceholderText, getByText } = setupLoginPage();
 
-		expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
-	});
+      fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@gmail.com' } });
+      fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password1234' } });
+      fireEvent.click(getByText('LOGIN'));
+
+      await waitFor(() => expect(axios.post).toHaveBeenCalled());
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+
+    it('should navigate to forgot-password page on when forgot password button is clicked', async () => {
+      const { getByText } = setupLoginPage();
+
+      fireEvent.click(getByText('Forgot Password'));	
+
+      expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
+    });
 });
