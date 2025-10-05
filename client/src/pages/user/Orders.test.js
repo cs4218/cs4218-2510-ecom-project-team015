@@ -14,7 +14,16 @@ jest.mock("axios");
 jest.mock("../../context/auth");
 jest.mock("../../context/cart");
 jest.mock("../../context/search");
-jest.mock("react-hot-toast");
+jest.mock("react-hot-toast", () => ({
+    toast: {
+        success: jest.fn(),
+        error: jest.fn(),
+    },
+}));
+jest.mock("../../components/Layout", () => ({ children }) => (
+  <div data-testid="mock-layout">{children}</div>
+));
+
 
 describe("When rendering orders page", () => {
     beforeEach(() => {
@@ -181,7 +190,7 @@ describe("When rendering orders page", () => {
         });
     });
 
-    test("getOrders not called when token does not exist", async() => {
+    test("axios not called when token does not exist", async() => {
         useAuth.mockReturnValue([{user: {name: "abc"}}, jest.fn()]); //token does not exist
         Orders.getOrders = jest.fn();
         render(
@@ -190,7 +199,7 @@ describe("When rendering orders page", () => {
             </MemoryRouter>
         );
 
-        expect(Orders.getOrders).not.toHaveBeenCalled();
+        expect(axios.get).not.toHaveBeenCalled();
     });
 
     test("toast message displayed if error response does not contain data", async() => {

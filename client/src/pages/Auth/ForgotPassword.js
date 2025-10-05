@@ -32,7 +32,9 @@ const ForgotPassword = () => {
           }
         } catch (error) {
           console.log(error);
-          toast.error(error.response.data.message);
+          // Look for error message in response, else use a general message
+          const message = error.response?.data?.message || "Something went wrong";
+          toast.error(message);
         }
       };
 

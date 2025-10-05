@@ -25,6 +25,7 @@ describe("Admin Menu Component", () => {
 		expect(screen.getByRole("link", { name: /create product/i })).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /products/i })).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /orders/i })).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /users/i })).toBeInTheDocument();
 	});
 
 	it("links have the correct hrefs", () => {
@@ -45,6 +46,10 @@ describe("Admin Menu Component", () => {
 			"href",
 			"/dashboard/admin/orders"
 		);
+		expect(screen.getByRole("link", { name: /users/i })).toHaveAttribute(
+			"href",
+			"/dashboard/admin/users"
+		);
 	});
 
 	it("does not mark any link active on the base admin path", () => {
@@ -53,6 +58,7 @@ describe("Admin Menu Component", () => {
 		expect(screen.getByRole("link", { name: /create product/i })).not.toHaveClass("active");
 		expect(screen.getByRole("link", { name: /products/i })).not.toHaveClass("active");
 		expect(screen.getByRole("link", { name: /orders/i })).not.toHaveClass("active");
+		expect(screen.getByRole("link", { name: /users/i })).not.toHaveClass("active");
 	});
 
 	// We will use a data-driven approach to test the active link logic
@@ -63,22 +69,27 @@ describe("Admin Menu Component", () => {
 			{
 				path: "/create-category",
 				active: /create category/i,
-				inactive: [/create product/i, /products/i, /orders/i],
+				inactive: [/create product/i, /products/i, /orders/i, /users/i],
 			},
 			{
 				path: "/create-product",
 				active: /create product/i,
-				inactive: [/create category/i, /products/i, /orders/i],
+				inactive: [/create category/i, /products/i, /orders/i, /users/i],
 			},
 			{
 				path: "/products",
 				active: /products/i,
-				inactive: [/create category/i, /create product/i, /orders/i],
+				inactive: [/create category/i, /create product/i, /orders/i, /users/i],
 			},
 			{
 				path: "/orders",
 				active: /orders/i,
-				inactive: [/create category/i, /create product/i, /products/i],
+				inactive: [/create category/i, /create product/i, /products/i, /users/i],
+			},
+			{
+				path: "/users",
+				active: /users/i,
+				inactive: [/create category/i, /create product/i, /products/i, /orders/i],
 			},
 		];
 

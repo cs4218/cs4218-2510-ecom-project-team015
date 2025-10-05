@@ -1,3 +1,4 @@
+// Tests for categoryControlller and singleCategoryController are written with the help of Claude.
 import {
 	createCategoryController,
 	updateCategoryController,
