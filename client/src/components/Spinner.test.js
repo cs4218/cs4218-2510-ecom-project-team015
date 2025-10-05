@@ -1,3 +1,4 @@
+// These tests have been written with the help of ChatGPT and Claude.
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
 import Spinner from "./Spinner";
@@ -47,6 +48,16 @@ describe("Spinner Component", () => {
     });
 
     // Navigate should have been called
+    expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/test" });
+  });
+
+  it("should use default path 'login' when no path prop is provided", () => {
+    render(<Spinner />);
+
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
     expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/test" });
   });
 });

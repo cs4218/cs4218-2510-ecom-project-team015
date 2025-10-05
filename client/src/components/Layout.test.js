@@ -1,3 +1,4 @@
+// These tests have been written with the help of ChatGPT.
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';

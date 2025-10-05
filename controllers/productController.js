@@ -393,32 +393,44 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
 	try {
 		const { nonce, cart } = req.body;
+		if (!nonce) {
+			return res.status(400).send({ error: 'Nonce required' });
+		}
+		
 		let total = 0;
-		cart.map((i) => {
-			total += i.price;
-		});
-		let newTransaction = gateway.transaction.sale(
-			{
-				amount: total,
-				paymentMethodNonce: nonce,
-				options: {
-					submitForSettlement: true,
+		cart.forEach((i) => { total += i.price; });
+		
+		const paymentResult = await new Promise((resolve, reject) => {
+			gateway.transaction.sale(
+				{
+					amount: total,
+					paymentMethodNonce: nonce,
+					options: { submitForSettlement: true }
 				},
-			},
-			function (error, result) {
-				if (result) {
-					const order = new orderModel({
-						products: cart,
-						payment: result,
-						buyer: req.user._id,
-					}).save();
-					res.json({ ok: true });
-				} else {
-					res.status(500).send(error);
+				function (error, result) {
+					if (error) {
+						reject(error);
+					} else {
+						resolve(result);
+					}
 				}
-			}
-		);
+			);
+		});
+		
+		await new orderModel({
+			products: cart,
+			payment: paymentResult,
+			buyer: req.user._id,
+		}).save();
+		
+		res.json({ ok: true });
+		
 	} catch (error) {
 		console.log(error);
+		res.status(500).send({
+			success: false,
+			message: 'Error processing payment',
+			error: error.message
+		});
 	}
 };
