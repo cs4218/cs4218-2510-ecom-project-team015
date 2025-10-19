@@ -22,7 +22,8 @@ var gateway = new braintree.BraintreeGateway({
 
 export const createProductController = async (req, res) => {
 	try {
-		const { name, description, price, category, quantity, shipping } = req.fields;
+		const { name, description, price, category, quantity, shipping } =
+			req.fields;
 		const { photo } = req.files;
 		//validation
 		switch (true) {
@@ -47,13 +48,22 @@ export const createProductController = async (req, res) => {
 		// Validate price is a positive number and within range
 		const priceNum = Number(price);
 		if (!Number.isFinite(priceNum) || priceNum <= 0 || priceNum > MAX_PRICE) {
-			return res.status(400).send({ error: `Price must be > 0 and ≤ ${MAX_PRICE}` });
+			return res
+				.status(400)
+				.send({ error: `Price must be > 0 and ≤ ${MAX_PRICE}` });
 		}
 
 		// Validate quantity is a positive integer and within range
 		const qtyNum = Number(quantity);
-		if (!Number.isFinite(qtyNum) || !Number.isInteger(qtyNum) || qtyNum <= 0 || qtyNum > MAX_QTY) {
-			return res.status(400).send({ error: `Quantity must be an integer > 0 and ≤ ${MAX_QTY}` });
+		if (
+			!Number.isFinite(qtyNum) ||
+			!Number.isInteger(qtyNum) ||
+			qtyNum <= 0 ||
+			qtyNum > MAX_QTY
+		) {
+			return res
+				.status(400)
+				.send({ error: `Quantity must be an integer > 0 and ≤ ${MAX_QTY}` });
 		}
 
 		const products = new productModel({ ...req.fields, slug: slugify(name) });
@@ -147,7 +157,9 @@ export const productPhotoController = async (req, res) => {
 //delete controller
 export const deleteProductController = async (req, res) => {
 	try {
-		const deleted = await productModel.findByIdAndDelete(req.params.pid).select("-photo");
+		const deleted = await productModel
+			.findByIdAndDelete(req.params.pid)
+			.select("-photo");
 
 		// Bug Fix: Added a check to send a error response when product id is not found
 		if (!deleted) {
@@ -174,7 +186,8 @@ export const deleteProductController = async (req, res) => {
 //update products
 export const updateProductController = async (req, res) => {
 	try {
-		const { name, description, price, category, quantity, shipping } = req.fields;
+		const { name, description, price, category, quantity, shipping } =
+			req.fields;
 		const { photo } = req.files;
 		//validation
 		switch (true) {
@@ -190,20 +203,31 @@ export const updateProductController = async (req, res) => {
 				return res.status(500).send({ error: "Quantity is Required" });
 			// Bug Fix: Corrected error handling for images and fixed typos
 			case photo && photo.size > 1000000:
-				return res.status(500).send({ error: "Photo is required and should be less than 1MB" });
+				return res
+					.status(500)
+					.send({ error: "Photo is required and should be less than 1MB" });
 		}
 
 		// Bug Fix: We want to ensure price and quantity are valid numbers within acceptable ranges
 		// Validate price is a positive number and within range
 		const priceNum = Number(price);
 		if (!Number.isFinite(priceNum) || priceNum <= 0 || priceNum > MAX_PRICE) {
-			return res.status(400).send({ error: `Price must be > 0 and ≤ ${MAX_PRICE}` });
+			return res
+				.status(400)
+				.send({ error: `Price must be > 0 and ≤ ${MAX_PRICE}` });
 		}
 
 		// Validate quantity is a positive integer and within range
 		const qtyNum = Number(quantity);
-		if (!Number.isFinite(qtyNum) || !Number.isInteger(qtyNum) || qtyNum <= 0 || qtyNum > MAX_QTY) {
-			return res.status(400).send({ error: `Quantity must be an integer > 0 and ≤ ${MAX_QTY}` });
+		if (
+			!Number.isFinite(qtyNum) ||
+			!Number.isInteger(qtyNum) ||
+			qtyNum <= 0 ||
+			qtyNum > MAX_QTY
+		) {
+			return res
+				.status(400)
+				.send({ error: `Quantity must be an integer > 0 and ≤ ${MAX_QTY}` });
 		}
 
 		const products = await productModel.findByIdAndUpdate(
@@ -213,7 +237,9 @@ export const updateProductController = async (req, res) => {
 		);
 
 		if (!products) {
-			return res.status(404).send({ success: false, message: "Product not found" });
+			return res
+				.status(404)
+				.send({ success: false, message: "Product not found" });
 		}
 
 		if (photo) {
@@ -394,18 +420,20 @@ export const brainTreePaymentController = async (req, res) => {
 	try {
 		const { nonce, cart } = req.body;
 		if (!nonce) {
-			return res.status(400).send({ error: 'Nonce required' });
+			return res.status(400).send({ error: "Nonce required" });
 		}
-		
+
 		let total = 0;
-		cart.forEach((i) => { total += i.price; });
-		
+		cart.forEach((i) => {
+			total += i.price;
+		});
+
 		const paymentResult = await new Promise((resolve, reject) => {
 			gateway.transaction.sale(
 				{
 					amount: total,
 					paymentMethodNonce: nonce,
-					options: { submitForSettlement: true }
+					options: { submitForSettlement: true },
 				},
 				function (error, result) {
 					if (error) {
@@ -416,21 +444,21 @@ export const brainTreePaymentController = async (req, res) => {
 				}
 			);
 		});
-		
+
 		await new orderModel({
 			products: cart,
 			payment: paymentResult,
 			buyer: req.user._id,
+			status: "Processing",
 		}).save();
-		
+
 		res.json({ ok: true });
-		
 	} catch (error) {
 		console.log(error);
 		res.status(500).send({
 			success: false,
-			message: 'Error processing payment',
-			error: error.message
+			message: "Error processing payment",
+			error: error.message,
 		});
 	}
 };
