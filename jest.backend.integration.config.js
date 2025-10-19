@@ -6,12 +6,12 @@ export default {
   testEnvironment: "node",
 
   // setup file for initializing things like MSW or global mocks
-  setupFilesAfterEnv: ["<rootDir>/tests/setupIntegration.js"],
+  // setupFilesAfterEnv: ["<rootDir>/tests/setupIntegration.js"],
 
   // all integration tests
   testMatch: ["<rootDir>/tests/integration/*.test.js"],
 
   // optionally, add coverage thresholds if you want
-  collectCoverage: true,
-  collectCoverageFrom: ["tests/integration/**"],
+  // collectCoverage: true,
+  // collectCoverageFrom: ["tests/integration/**"],
 };
