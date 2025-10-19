@@ -3,9 +3,9 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import testApp from './serverSetup.js';
-import User from '../../models/userModel.js';
-import { comparePassword } from '../../helpers/authHelper.js';
+import testApp from '../serverSetup.js';
+import User from '../../../models/userModel.js';
+import { comparePassword } from '../../../helpers/authHelper.js';
 
 describe('Integration tests for Registration feature', () => {
     let mongoServer;
