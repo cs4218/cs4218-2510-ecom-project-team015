@@ -22,8 +22,7 @@ const CartPage = () => {
 			let total = 0;
 			cart?.forEach((item) => {
 				const price = Number(item?.price) || 0;
-				const qty = Number(item?.quantity ?? 1);
-				total += price * qty;
+				total += price;
 			});
 			return total.toLocaleString("en-US", {
 				style: "currency",
@@ -141,7 +140,6 @@ const CartPage = () => {
 										<p>{p.name}</p>
 										<p>{(p.description || "").substring(0, 30)}</p>
 										<p>Price : {p.price}</p>
-										{p?.quantity ? <p>Qty: {p.quantity}</p> : null}
 									</div>
 									<div className="col-md-4 cart-remove-btn">
 										<button
