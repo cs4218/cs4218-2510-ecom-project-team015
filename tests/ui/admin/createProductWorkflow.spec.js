@@ -18,7 +18,7 @@ async function gotoCreateProduct(page) {
 	await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
 }
 
-test.describe("Create Product", () => {
+test.describe("Create Product Workflow", () => {
 	test.setTimeout(30_000);
 
 	test("create product with valid inputs and check if it is added on products page", async ({

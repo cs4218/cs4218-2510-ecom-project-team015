@@ -5,7 +5,7 @@ import path from "path";
 
 export async function loginAsAdmin(
 	page,
-	{ email = "admin@gmail.com", password = "Admin12345" } = {}
+	{ email = "cs4218Admin@test.com", password = "cs4218@test.com" } = {}
 ) {
 	await page.goto("/");
 	await page.getByRole("link", { name: /login/i }).click();
@@ -27,7 +27,7 @@ export async function logoutFromNavbar(page) {
 	await expect(page).not.toHaveURL(/\/dashboard\/admin/i);
 }
 
-export async function loginAsUser(page, { email = "user@gmail.com", password = "User12345" } = {}) {
+export async function loginAsUser(page, { email = "cs4218@test.com", password = "cs4218@test.com" } = {}) {
 	await page.goto("/");
 	await page.getByRole("link", { name: /login/i }).click();
 	await page.getByRole("textbox", { name: /enter your email/i }).fill(email);

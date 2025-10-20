@@ -6,11 +6,14 @@ import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 const Products = () => {
 	const [products, setProducts] = useState([]);
-
+	
 	//getall products
 	const getAllProducts = async () => {
 		try {
-			const { data } = await axios.get("/api/v1/product/get-product");
+			// Bug Fix: Added params to get all products without pagination
+			 const { data } = await axios.get("/api/v1/product/get-product", {
+					params: { page: 1, perPage: 1000 }, 
+				});
 			setProducts(data.products);
 		} catch (error) {
 			console.log(error);
@@ -24,18 +27,21 @@ const Products = () => {
 		getAllProducts();
 	}, []);
 	return (
-    // Bug Fix: Added Products Title
+		// Bug Fix: Added Products Title
 		<Layout title="Dashboard - Products">
 			<div className="row">
 				<div className="col-md-3">
 					<AdminMenu />
 				</div>
 
-				<div className="col-md-9">
+				<div className="col-md-9 vh-100 d-flex flex-column">
 					<h1 className="text-center mb-4">All Products List</h1>
 
 					{/* Bug Fix: Made it into responsive grid because it was overflowing */}
-					<div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+					<div
+						className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 flex-grow-1 overflow-auto"
+						style={{ minHeight: 0 }}
+					>
 						{products?.map((p) => (
 							<div className="col" key={p._id}>
 								<Link
@@ -71,7 +77,9 @@ const Products = () => {
 												<span className="fw-semibold" style={{ color: "#16a34a" }}>
 													${p.price}
 												</span>
-												<span className="btn btn-sm btn-outline-primary">Edit</span>
+												<span className="btn btn-sm btn-outline-primary" role="button">
+													Edit
+												</span>
 											</div>
 										</div>
 									</div>
