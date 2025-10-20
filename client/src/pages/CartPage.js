@@ -11,7 +11,7 @@ import "../styles/CartStyles.css";
 
 const CartPage = () => {
   const [auth, setAuth] = useAuth();
-  const [cart, setCart] = useCart();
+  const [cart, setCart, cartActions] = useCart();
   const [clientToken, setClientToken] = useState("");
   const [instance, setInstance] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ const CartPage = () => {
   const totalPrice = () => {
     try {
       let total = 0;
-      cart?.map((item) => {
+      cart?.forEach((item) => {
         total = total + item.price;
       });
       return total.toLocaleString("en-US", {
@@ -33,13 +33,11 @@ const CartPage = () => {
     }
   };
   //detele item
-  const removeCartItem = (pid) => {
+  const removeCartItem = (index) => {
     try {
-      let myCart = [...cart];
-      let index = myCart.findIndex((item) => item._id === pid);
-      myCart.splice(index, 1);
-      setCart(myCart);
-      localStorage.setItem("cart", JSON.stringify(myCart));
+      if (cartActions?.removeFromCart) {
+        cartActions.removeFromCart(index);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -68,8 +66,11 @@ const CartPage = () => {
         cart,
       });
       setLoading(false);
-      localStorage.removeItem("cart");
-      setCart([]);
+
+      if (cartActions?.clearCart) {
+        await cartActions.clearCart();
+      }
+
       navigate("/dashboard/user/orders");
       toast.success("Payment Completed Successfully ");
     } catch (error) {
@@ -99,8 +100,8 @@ const CartPage = () => {
         <div className="container ">
           <div className="row ">
             <div className="col-md-7  p-0 m-0">
-              {cart?.map((p) => (
-                <div className="row card flex-row" key={p._id}>
+              {cart?.map((p, index) => (
+                <div className="row card flex-row" key={`${p._id}-${index}`}>
                   <div className="col-md-4">
                     <img
                       src={`/api/v1/product/product-photo/${p._id}`}
@@ -118,7 +119,7 @@ const CartPage = () => {
                   <div className="col-md-4 cart-remove-btn">
                     <button
                       className="btn btn-danger"
-                      onClick={() => removeCartItem(p._id)}
+                      onClick={() => removeCartItem(index)}
                     >
                       Remove
                     </button>
