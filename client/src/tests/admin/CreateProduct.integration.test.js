@@ -164,7 +164,7 @@ describe("Create Product", () => {
 		expect(axios.post).not.toHaveBeenCalled();
 	});
 
-	test("show a toast error when server return {success:false}", async () => {
+	test("show a toast error when we recieve {success:false} from the server", async () => {
 		axios.get.mockResolvedValueOnce({
 			data: { success: true, category: [{ _id: "c1", name: "Home" }] },
 		});
