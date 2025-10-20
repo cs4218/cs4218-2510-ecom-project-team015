@@ -5,11 +5,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import "../../styles/AuthStyles.css";
 import { useAuth } from "../../context/auth";
+import { useCart } from "../../context/cart";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [auth, setAuth] = useAuth();
+  const [cart, setCart, cartActions] = useCart(); 
   
 
   const navigate = useNavigate();
@@ -39,6 +41,13 @@ const Login = () => {
             token: res.data.token,
         });
         localStorage.setItem("auth", JSON.stringify({user: res.data.user, token: res.data.token}));
+
+        setTimeout(() => {
+          if (cartActions?.mergeCart) {
+            cartActions.mergeCart();
+          }
+        }, 100);
+        
         navigate(location.state || "/");
       } else {
         toast.error(res.data.message);

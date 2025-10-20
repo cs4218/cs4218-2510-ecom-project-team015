@@ -6,13 +6,22 @@ import connectDB from "./config/db.js";
 import authRoutes from './routes/authRoute.js'
 import categoryRoutes from './routes/categoryRoutes.js'
 import productRoutes from './routes/productRoutes.js'
+import cartRoutes from './routes/cartRoutes.js'
 import cors from "cors";
+import { connectTestDB, seedTestDB } from "./tests/ui/seed/test-db-setup.js";
 
 // configure env
 dotenv.config();
 
-//database config
-connectDB();
+if (process.env.DEV_MODE === "test") {
+    await connectTestDB();
+    await seedTestDB();
+
+} else {
+    //database config
+    connectDB();
+}
+
 
 const app = express();
 
@@ -25,6 +34,7 @@ app.use(morgan('dev'));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);
+app.use("/api/v1/cart", cartRoutes);
 
 // rest api
 
