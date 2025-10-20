@@ -9,7 +9,7 @@ export default {
   // setupFilesAfterEnv: ["<rootDir>/tests/setupIntegration.js"],
 
   // all integration tests
-  testMatch: ["<rootDir>/tests/integration/*.test.js"],
+  testMatch: ["<rootDir>/tests/integration/**/*.test.js"],
 
   // optionally, add coverage thresholds if you want
   collectCoverage: true,
