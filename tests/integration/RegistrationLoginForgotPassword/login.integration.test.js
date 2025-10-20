@@ -10,6 +10,7 @@ import JWT from 'jsonwebtoken';
 
 describe('Integration tests for Login feature', () => {
     let mongoServer;
+    let consoleSpy;
     process.env.JWT_SECRET = 'test-secret-key';
     const savedUser = {
         name: "Test User",
@@ -28,14 +29,11 @@ describe('Integration tests for Login feature', () => {
         await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
         // First, register a user to test the login feature
-
-
         const hashedPassword = await hashPassword(savedUser.password);
         await User.create({ ...savedUser, password: hashedPassword });
     });
 
     beforeEach(() => {
-        // 🕵️‍♂️ Spy on console.log
         consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {}); // prevent actual logs
     });
 
