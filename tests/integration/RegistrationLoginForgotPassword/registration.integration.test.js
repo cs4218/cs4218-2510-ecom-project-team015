@@ -18,8 +18,7 @@ describe('Integration tests for Registration feature', () => {
     });
 
     beforeEach(() => {
-    // 🕵️‍♂️ Spy on console.log
-        consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {}); // prevent actual logs
+        consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
     });
 
     // Clear the database after each test
