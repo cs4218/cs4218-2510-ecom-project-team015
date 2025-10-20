@@ -50,7 +50,9 @@ const Login = () => {
         
         navigate(location.state || "/");
       } else {
-        toast.error(res.data.message);
+        toast.error(res.data.message, {
+          duration: 5000,
+        });
       }
     } catch (error) {
       console.log(error);
