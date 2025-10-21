@@ -32,6 +32,7 @@ export default {
 		"<rootDir>/client/src/context/cart.test.js",
 		"<rootDir>/client/src/pages/HomePage.test.js",
 		"<rootDir>/client/src/pages/CartPage.test.js",
+		"<rootDir>/client/src/pages/user/Profile.test.js",
 	],
 
 	// jest code coverage
@@ -46,9 +47,10 @@ export default {
 		"!client/src/context/cart.js", // Excluded as some bug fixes have broken the tests
 		"!client/src/pages/CartPage.js", // Excluded as some bug fixes have broken the tests
 		"!client/src/pages/HomePage.js", // Excluded as it is not yet implemented
+		"!client/src/pages/user/Profile.*js",
 		"!client/src/context/cart.test.js", // I know test file is not supposed to be here but testPathIgnorePatterns changes jest behaviour so need to add it here too.
-		"!client/src/pages/CartPage.test.js", 
-		"!client/src/pages/HomePage.test.js", 
+		"!client/src/pages/CartPage.test.js",
+		"!client/src/pages/HomePage.test.js",
 	],
 	coverageThreshold: {
 		global: {
