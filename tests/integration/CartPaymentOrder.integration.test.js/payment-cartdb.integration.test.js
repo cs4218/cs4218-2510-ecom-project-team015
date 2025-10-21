@@ -1,4 +1,5 @@
-// tests/integration/payment-cart.integration.test.js
+// Author: Vedant Sinha
+// This file has been written with the help of Claude.
 
 import request from 'supertest';
 import express from 'express';

@@ -1,3 +1,6 @@
+// Author: Vedant Sinha
+// This file has been written with the help of Claude.
+
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 

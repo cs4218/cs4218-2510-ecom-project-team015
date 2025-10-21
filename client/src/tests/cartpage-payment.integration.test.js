@@ -1,5 +1,5 @@
 // Author: Vedant Sinha
-// This file has been created with the help of Claude.
+// This file has been written with the help of Claude.
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
