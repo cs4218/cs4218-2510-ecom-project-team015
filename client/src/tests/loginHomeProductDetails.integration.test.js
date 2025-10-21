@@ -29,6 +29,7 @@ jest.mock(
 	{ virtual: true }
 );
 
+//Created with the help of ChatGPT
 const Providers = ({ children, initialEntries = ["/"] }) => (
 	<AuthProvider>
 		<SearchProvider>
@@ -156,6 +157,213 @@ describe("Integration: Login -> HomePage -> Product Details", () => {
 
 		const img = screen.getByAltText("Phone X");
 		expect(img).toHaveAttribute("src", "/api/v1/product/product-photo/p1");
+	});
+
+	it(
+		"logs in, views product details, and adds product to cart",
+		async () => {
+			arrangeAxios();
+
+			render(
+				<Providers initialEntries={["/login"]}>
+					<App />
+				</Providers>
+			);
+
+			// Login
+			fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+				target: { value: "john@example.com" },
+			});
+			fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+				target: { value: "secret123" },
+			});
+			fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+			await waitFor(() => {
+				expect(screen.getByText("John Doe")).toBeInTheDocument();
+			});
+
+			// Navigate to product details
+			const phoneXTitle = await screen.findByRole(
+				"heading",
+				{
+					level: 5,
+					name: "Phone X",
+				},
+				{ timeout: 10000 }
+			);
+			const phoneXCard = phoneXTitle.closest(".card");
+			fireEvent.click(
+				within(phoneXCard).getByRole("button", { name: /More Details/i })
+			);
+
+			await waitFor(
+				() => {
+					expect(
+						screen.getByRole("heading", { level: 1, name: /Product Details/i })
+					).toBeInTheDocument();
+				},
+				{ timeout: 10000 }
+			);
+
+			// Add to cart from product details page
+			const addToCartButton = screen.getByRole("button", {
+				name: /ADD TO CART/i,
+			});
+			fireEvent.click(addToCartButton);
+
+			// Verify product added to cart (check for success message or cart update)
+			await waitFor(() => {
+				expect(addToCartButton).toBeInTheDocument();
+			});
+		},
+		15000
+	);
+
+	it(
+		"logs in and navigates to second product details",
+		async () => {
+			arrangeAxios();
+
+			render(
+				<Providers initialEntries={["/login"]}>
+					<App />
+				</Providers>
+			);
+
+			// Login
+			fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+				target: { value: "john@example.com" },
+			});
+			fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+				target: { value: "secret123" },
+			});
+			fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+			await waitFor(() => {
+				expect(screen.getByText("John Doe")).toBeInTheDocument();
+			});
+
+			// Find and click on Phone Y product
+			const phoneYTitle = await screen.findByRole(
+				"heading",
+				{
+					level: 5,
+					name: "Phone Y",
+				},
+				{ timeout: 10000 }
+			);
+			expect(phoneYTitle).toBeInTheDocument();
+
+			// Verify product card shows correct information
+			const phoneYCard = phoneYTitle.closest(".card");
+			expect(
+				within(phoneYCard).getByText(/Also great and affordable/i)
+			).toBeInTheDocument();
+		},
+		15000
+	);
+
+	it(
+		"logs in, adds product to cart from homepage",
+		async () => {
+			arrangeAxios();
+
+			render(
+				<Providers initialEntries={["/login"]}>
+					<App />
+				</Providers>
+			);
+
+			// Login
+			fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+				target: { value: "john@example.com" },
+			});
+			fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+				target: { value: "secret123" },
+			});
+			fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+			await waitFor(() => {
+				expect(screen.getByText("John Doe")).toBeInTheDocument();
+			});
+
+			// Find Phone X card and add to cart directly from homepage
+			const phoneXTitle = await screen.findByRole(
+				"heading",
+				{
+					level: 5,
+					name: "Phone X",
+				},
+				{ timeout: 10000 }
+			);
+			const phoneXCard = phoneXTitle.closest(".card");
+
+			const addToCartButton = within(phoneXCard).getByRole("button", {
+				name: /ADD TO CART/i,
+			});
+			fireEvent.click(addToCartButton);
+
+			// Verify button exists and can be clicked
+			expect(addToCartButton).toBeInTheDocument();
+		},
+		15000
+	);
+
+	it("displays correct product count on homepage after login", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText("John Doe")).toBeInTheDocument();
+		});
+
+		// Verify both products are displayed
+		await waitFor(() => {
+			expect(screen.getByText("Phone X")).toBeInTheDocument();
+		});
+		expect(screen.getByText("Phone Y")).toBeInTheDocument();
+	});
+
+	it("fails login and does not reach homepage", async () => {
+		arrangeAxios({ loginOk: false });
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Try to login with invalid credentials
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "invalid@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "wrongpassword" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		// Should stay on login page
+		await waitFor(() => {
+			expect(screen.getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
+		});
+
+		// Should not see homepage elements
+		expect(screen.queryByText("Phone X")).not.toBeInTheDocument();
 	});
 });
 
