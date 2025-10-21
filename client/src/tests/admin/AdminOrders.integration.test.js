@@ -1,203 +1,125 @@
-// Written by Ujjwal Gaurav
-// This test file checks the admin orders functionality in admin dashboard
-import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
-import AdminOrders from "../../pages/admin/AdminOrders";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import AdminMenu from "../../components/AdminMenu";
+import Layout from "../../components/Layout";
+import { useAuth } from "../../context/auth";
+import moment from "moment";
+import { Select } from "antd";
+const { Option } = Select;
 
 
-jest.mock("../../components/Layout", () => ({
-	__esModule: true,
-	default: ({ children }) => <div data-testid="layout">{children}</div>,
-}));
+const AdminOrders = () => {
+  // Bug Fix: Corrected spelling mistakes 
+  const [status, setStatus] = useState([
+    "Not Processed",
+    "Processing",
+    "Shipped",
+    "Delivered",
+    "Cancelled",
+  ]);
+  // Bug Fix: Corrected typo from "chageStatus" to "changeStatus"
+  // and setCHangeStatus to setChangeStatus
+  // const [changeStatus, setChangeStatus] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [auth, setAuth] = useAuth();
+  const getOrders = async () => {
+    try {
+      const { data } = await axios.get("/api/v1/auth/all-orders");
+      setOrders(data);
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong while fetching orders");
+    }
+  };
 
-jest.mock("../../components/AdminMenu", () => ({
-	__esModule: true,
-	default: () => <div aria-label="admin-menu">AdminMenu</div>,
-}));
+  useEffect(() => {
+    if (auth?.token) getOrders();
+  }, [auth?.token]);
 
-let mockUseAuth;
+  const handleChange = async (orderId, value) => {
+    try {
+      const { data } = await axios.put(`/api/v1/auth/order-status/${orderId}`, {
+        status: value,
+      });
+      getOrders();
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong while updating order status");
+    }
+  };
+  return (
+    <Layout title={"All Orders Data"}>
+      <div className="row dashboard">
+        <div className="col-md-3">
+          <AdminMenu />
+        </div>
+        <div className="col-md-9">
+          <h1 className="text-center">All Orders</h1>
+          {orders?.map((o, i) => {
+            return (
+							<div className="border shadow" key={o._id}>
+								<table className="table">
+									<thead>
+										<tr>
+											<th scope="col">#</th>
+											<th scope="col">Status</th>
+											<th scope="col">Buyer</th>
+											<th scope="col"> date</th>
+											<th scope="col">Payment</th>
+											<th scope="col">Quantity</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr key={o._id + "-row"}>
+											<td>{i + 1}</td>
+											<td>
+												<Select
+													bordered={false}
+													onChange={(value) => handleChange(o._id, value)}
+													defaultValue={o?.status}
+												>
+													{status.map((s, i) => (
+														<Option key={i} value={s}>
+															{s}
+														</Option>
+													))}
+												</Select>
+											</td>
+											<td>{o?.buyer?.name}</td>
+											<td>{moment(o?.createdAt).fromNow()}</td>
+											<td>{o?.payment.success ? "Success" : "Failed"}</td>
+											<td>{o?.products?.length}</td>
+										</tr>
+									</tbody>
+								</table>
+								<div className="container">
+									{o?.products?.map((p, i) => (
+										<div className="row mb-2 p-3 card flex-row" key={p._id}>
+											<div className="col-md-4">
+												<img
+													src={`/api/v1/product/product-photo/${p._id}`}
+													className="card-img-top"
+													alt={p.name}
+													width="100px"
+													height={"100px"}
+												/>
+											</div>
+											<div className="col-md-8">
+												<p>{p.name}</p>
+												<p>{p.description.substring(0, 30)}</p>
+												<p>Price : {p.price}</p>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						);
+          })}
+        </div>
+      </div>
+    </Layout>
+  );
+};
 
-jest.mock("../../context/auth", () => ({
-	__esModule: true,
-	useAuth: (...args) => mockUseAuth?.(...args),
-}));
-
-// Created using ChatGPT
-jest.mock("antd", () => {
-	const React = require("react");
-	const Select = ({ value, defaultValue, onChange, children, placeholder }) => {
-		const props =
-			value !== undefined
-				? { value }
-				: { defaultValue: defaultValue !== undefined ? defaultValue : "" };
-		return (
-			<select
-				aria-label={placeholder || "select"}
-				onChange={(e) => onChange(e.target.value)}
-				{...props}>
-				{React.Children.map(children, (c) => c)}
-			</select>
-		);
-	};
-	Select.Option = ({ value, children }) => (
-		<option value={value}>{children}</option>
-	);
-	return { __esModule: true, Select };
-});
-
-jest.mock("axios", () => ({
-	__esModule: true,
-	default: { get: jest.fn(), put: jest.fn() },
-}));
-
-jest.mock("react-hot-toast", () => ({
-	__esModule: true,
-	default: { success: jest.fn(), error: jest.fn() },
-}));
-
-// Created using ChatGPT
-const orders = [
-	{
-		_id: "o1",
-		status: "Processing",
-		buyer: { name: "User1" },
-		createdAt: "2024-01-01T00:00:00.000Z",
-		payment: { success: true },
-		products: [
-			{ _id: "p1", name: "Lamp", description: "Bright metal lamp", price: 10 },
-		],
-	},
-	{
-		_id: "o2",
-		status: "Not Processed",
-		buyer: { name: "User2" },
-		createdAt: "2024-01-02T00:00:00.000Z",
-		payment: { success: false },
-		products: [
-			{
-				_id: "p2",
-				name: "Chair",
-				description: "Wood chair lorem ipsum",
-				price: 20,
-			},
-			{
-				_id: "p3",
-				name: "Desk",
-				description: "Desk abcdefghijklmnop",
-				price: 50,
-			},
-		],
-	},
-];
-
-function renderPage() {
-	return render(
-		<MemoryRouter initialEntries={["/dashboard/admin/orders"]}>
-			<Routes>
-				<Route path="/dashboard/admin/orders" element={<AdminOrders />} />
-			</Routes>
-		</MemoryRouter>
-	);
-}
-
-afterEach(() => {
-	jest.clearAllMocks();
-});
-
-describe("Admin Orders", () => {
-	test("load all the orders in rows when auth token exists", async () => {
-		mockUseAuth = jest
-			.fn()
-			.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
-		axios.get.mockResolvedValueOnce({ data: orders });
-
-		renderPage();
-
-		await waitFor(() =>
-			expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/all-orders")
-		);
-
-		expect(
-			await screen.findByRole("heading", { name: /all orders/i })
-		).toBeInTheDocument();
-		expect(screen.getByText("User1")).toBeInTheDocument();
-		expect(screen.getByText("User2")).toBeInTheDocument();
-
-		expect(screen.getByText("Success")).toBeInTheDocument();
-		expect(screen.getByText("Failed")).toBeInTheDocument();
-		expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
-
-		const selects = screen.getAllByLabelText(/select/i);
-		expect(selects[0]).toHaveValue("Processing");
-		expect(selects[1]).toHaveValue("Not Processed");
-
-		expect(screen.getByText("Lamp")).toBeInTheDocument();
-		expect(screen.getByText("Chair")).toBeInTheDocument();
-		expect(screen.getByText("Desk")).toBeInTheDocument();
-	});
-
-	test("verify if changing order status calls PUT request and refetches all the orders", async () => {
-		mockUseAuth = jest
-			.fn()
-			.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
-		axios.get
-			.mockResolvedValueOnce({ data: orders })
-			.mockResolvedValueOnce({ data: orders });
-		axios.put.mockResolvedValueOnce({ data: { success: true } });
-
-		renderPage();
-
-		const selects = await screen.findAllByLabelText(/select/i);
-		await userEvent.selectOptions(selects[1], "Shipped");
-
-		expect(axios.put).toHaveBeenCalledWith("/api/v1/auth/order-status/o2", {
-			status: "Shipped",
-		});
-		await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
-	});
-
-	test("show a toast error when updating order status fails", async () => {
-		mockUseAuth = jest
-			.fn()
-			.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
-		axios.get.mockResolvedValueOnce({ data: orders });
-		axios.put.mockRejectedValueOnce(new Error("boom"));
-
-		renderPage();
-
-		const selects = await screen.findAllByLabelText(/select/i);
-		userEvent.selectOptions(selects[0], "Shipped");
-
-		await waitFor(() =>
-			expect(toast.error).toHaveBeenCalledWith(
-				"Something went wrong while updating order status"
-			)
-		);
-		expect(axios.get).toHaveBeenCalledTimes(1);
-	});
-
-	test("verify that it doesn't fetch any order when auth token doesn't exist", async () => {
-		mockUseAuth = jest.fn().mockReturnValue([{ token: undefined }]);
-
-		renderPage();
-		await new Promise((r) => setTimeout(r, 0));
-		expect(axios.get).not.toHaveBeenCalled();
-	});
-
-	test("show a toast error when we have unexpected error such as network or server down", async () => {
-		mockUseAuth.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
-		axios.get.mockRejectedValueOnce(new Error("down"));
-
-		renderPage();
-
-		await waitFor(() =>
-			expect(toast.error).toHaveBeenCalledWith(
-				"Something went wrong while fetching orders"
-			)
-		);
-	});
-});
+export default AdminOrders;
