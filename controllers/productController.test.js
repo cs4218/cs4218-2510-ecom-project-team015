@@ -1307,7 +1307,7 @@ describe("getProductController", () => {
 		expect(find).toHaveBeenCalledWith({});
 		expect(c.populate).toHaveBeenCalledWith("category");
 		expect(c.select).toHaveBeenCalledWith("-photo");
-		expect(c.limit).toHaveBeenCalledWith(12);
+		expect(c.limit).toHaveBeenCalledWith(48);
 		expect(c.sort).toHaveBeenCalledWith({ createdAt: -1 });
 		expect(res.status).toHaveBeenCalledWith(200);
 		expect(res.send).toHaveBeenCalledWith(

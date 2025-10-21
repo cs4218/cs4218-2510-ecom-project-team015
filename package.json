@@ -14,7 +14,11 @@
 		"test:frontend": "jest --config jest.frontend.config.js",
 		"test:backend": "jest --config jest.backend.config.js",
 		"test:feintegration": "jest --config jest.frontend.integration.config.js",
-		"test:beintegration": "jest --config jest.backend.integration.config.js"
+		"test:beintegration": "jest --config jest.backend.integration.config.js",
+		"test:ui": "playwright test",
+		"ctest": "playwright test --project=chromium",
+		"ftest": "playwright test --project=firefox",
+		"wtest": "playwright test --project=webkit"
 	},
 	"keywords": [],
 	"author": "RP",
