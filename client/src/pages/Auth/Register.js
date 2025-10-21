@@ -83,7 +83,7 @@ const Register = () => {
           </div>
           <div className="mb-3">
             <input
-              type="text"
+              type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="form-control"
