@@ -14,7 +14,8 @@
 		"test:frontend": "jest --config jest.frontend.config.js",
 		"test:backend": "jest --config jest.backend.config.js",
 		"test:feintegration": "jest --config jest.frontend.integration.config.js",
-		"test:beintegration": "jest --config jest.backend.integration.config.js"
+		"test:beintegration": "jest --config jest.backend.integration.config.js",
+		"ptest": "npx playwright test"
 	},
 	"keywords": [],
 	"author": "RP",
