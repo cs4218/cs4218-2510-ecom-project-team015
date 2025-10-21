@@ -56,7 +56,7 @@ export const createProductController = async (req, res) => {
 			return res.status(400).send({ error: `Quantity must be an integer > 0 and ≤ ${MAX_QTY}` });
 		}
 
-		const products = new productModel({ ...req.fields, slug: slugify(name) });
+		const products = new productModel({ ...req.fields, slug: slugify(name, { lower: true }) });
 
 		if (photo) {
 			products.photo.data = fs.readFileSync(photo.path);
@@ -87,12 +87,13 @@ export const getProductController = async (req, res) => {
 			.find({})
 			.populate("category")
 			.select("-photo")
-			.limit(12)
+			.limit(48) // Bug Fix: Increased limit to 48 to show more products on admin grid
 			.sort({ createdAt: -1 });
 		res.status(200).send({
 			success: true,
 			counTotal: products.length,
-			message: "ALlProducts ",
+			// Bug Fix: Added better success message
+			message: "All Products Fetched Successfully",
 			products,
 		});
 	} catch (error) {
@@ -208,7 +209,7 @@ export const updateProductController = async (req, res) => {
 
 		const products = await productModel.findByIdAndUpdate(
 			req.params.pid,
-			{ ...req.fields, slug: slugify(name) },
+			{ ...req.fields, slug: slugify(name, { lower: true }) },
 			{ new: true }
 		);
 

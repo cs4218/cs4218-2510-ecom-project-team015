@@ -124,7 +124,7 @@ describe('Integration tests for Login feature', () => {
 
         expect(res.status).toBe(404);
         expect(res.body.success).toBe(false);
-        expect(res.body.message).toBe("Email is not registerd");
+        expect(res.body.message).toBe("Email is not registered");
     });
 
     it('should reject login attempt with incorrect password', async () => {

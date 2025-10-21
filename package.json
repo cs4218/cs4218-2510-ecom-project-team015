@@ -11,10 +11,15 @@
 		"dev": "concurrently \"npm run server\" \"npm run client\"",
 		"sonarqube": "sonar-scanner",
 		"test": "npm run test:backend && npm run test:frontend",
+		"test:integration": "npm run test:beintegration && npm run test:feintegration",
 		"test:frontend": "jest --config jest.frontend.config.js",
 		"test:backend": "jest --config jest.backend.config.js",
 		"test:feintegration": "jest --config jest.frontend.integration.config.js",
-		"test:beintegration": "jest --config jest.backend.integration.config.js"
+		"test:beintegration": "jest --config jest.backend.integration.config.js",
+		"test:ui": "playwright test",
+		"ctest": "playwright test --project=chromium",
+		"ftest": "playwright test --project=firefox",
+		"wtest": "playwright test --project=webkit"
 	},
 	"keywords": [],
 	"author": "RP",
