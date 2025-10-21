@@ -57,7 +57,7 @@ jest.mock("react-hot-toast", () => ({
 	default: { success: jest.fn(), error: jest.fn() },
 }));
 
-// Created sample data using ChatGPT
+// Created using ChatGPT
 const orders = [
 	{
 		_id: "o1",
