@@ -57,5 +57,25 @@ describe("Validate response received from backend when user is admin and sends r
     test("does not throw error even if db is empty", async () => {
         const response = await request(testApp).get("/api/v1/auth/all-users");
         expect(response.statusCode).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body.length).toBe(0);
+    });
+
+    test("returns error 500 if database call fails", async () => {
+        // Arrange
+        jest.spyOn(userModel, "find").mockImplementationOnce(() => {
+          throw new Error("Database failure");
+        });
+
+        // Act
+        const response = await request(testApp).get("/api/v1/auth/all-users");
+
+        // Assert
+        expect(response.statusCode).toBe(500);
+        expect(response.body.success).toBe(false);
+        expect(response.body.message).toBe("Error while fetching users");
+        expect(response.body.error).toBeDefined();
+
+        userModel.find.mockRestore();
     });
 });
