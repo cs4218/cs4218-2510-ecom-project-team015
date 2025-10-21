@@ -47,11 +47,11 @@ const Orders = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <td>{i + 1}</td>
-                        <td>{o?.status}</td>
-                        <td>{o?.buyer?.name}</td>
-                        <td>{moment(o?.createdAt).fromNow()}</td>
-                        <td>{o?.payment?.success ? "Success" : "Failed"}</td>
+                        <td data-testid={`order-number-${i+1}`}>{i + 1}</td>
+                        <td data-testid={`order-status-${i+1}`}>{o?.status}</td>
+                        <td data-testid={`order-buyer-${i+1}`}>{o?.buyer?.name}</td>
+                        <td data-testid={`order-date-${i+1}`}>{moment(o?.createdAt).fromNow()}</td>
+                        <td data-testid={`order-payment-${i+1}`}>{o?.payment?.success ? "Success" : "Failed"}</td>
                         <td>{o?.products?.length}</td>
                       </tr>
                     </tbody>
