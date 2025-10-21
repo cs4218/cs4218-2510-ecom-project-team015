@@ -8,6 +8,7 @@ import moment from "moment";
 import { Select } from "antd";
 const { Option } = Select;
 
+
 const AdminOrders = () => {
   // Bug Fix: Corrected spelling mistakes 
   const [status, setStatus] = useState([
@@ -19,7 +20,7 @@ const AdminOrders = () => {
   ]);
   // Bug Fix: Corrected typo from "chageStatus" to "changeStatus"
   // and setCHangeStatus to setChangeStatus
-  const [changeStatus, setChangeStatus] = useState("");
+  // const [changeStatus, setChangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
   const [auth, setAuth] = useAuth();
   const getOrders = async () => {
@@ -28,8 +29,7 @@ const AdminOrders = () => {
       setOrders(data);
     } catch (error) {
       console.log(error);
-	  // Bug Fix: Added toast error message for better UX
-	  toast.error("Something went wrong while fetching orders");
+      toast.error("Something went wrong while fetching orders");
     }
   };
 
@@ -45,8 +45,7 @@ const AdminOrders = () => {
       getOrders();
     } catch (error) {
       console.log(error);
-	  // Bug Fix: Added toast error message for better UX
-	  toast.error("Something went wrong while updating order status");
+      toast.error("Something went wrong while updating order status");
     }
   };
   return (
