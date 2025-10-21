@@ -49,13 +49,13 @@ const Users = () => {
                       <tbody>
                         {users.map((user, index) => (
                           <tr key={user._id}>
-                            <td>{index + 1}</td>
-                            <td>{user?.name}</td>
-                            <td>{user?.email}</td>
-                            <td>{moment(user?.createdAt).fromNow()}</td>
-                            <td>{user?.phone}</td>
-                            <td>{user?.address}</td>
-                            <td>{new Date(user?.DOB).toLocaleDateString()}</td>
+                            <td data-testid={`user-number-${index+1}`}>{index + 1}</td>
+                            <td data-testid={`user-name-${index+1}`}>{user?.name}</td>
+                            <td data-testid={`user-email-${index+1}`}>{user?.email}</td>
+                            <td data-testid={`account-created-${index+1}`}>{moment(user?.createdAt).fromNow()}</td>
+                            <td data-testid={`user-phone-${index+1}`}>{user?.phone}</td>
+                            <td data-testid={`user-address-${index+1}`}>{user?.address}</td>
+                            <td data-testid={`user-dob-${index+1}`}>{new Date(user?.DOB).toLocaleDateString()}</td>
                           </tr>
                         ))}
                       </tbody>
