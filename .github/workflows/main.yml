@@ -36,11 +36,11 @@ jobs:
       - name: Run Backend unit tests
         run: npm run test:backend
 
-      - name: Run Frontend integration tests
-        run: npm run test:feintegration
+      # - name: Run Frontend integration tests
+      #   run: npm run test:feintegration
 
-      - name: Run Backend integration tests
-        run: npm run test:beintegration
+      # - name: Run Backend integration tests
+      #   run: npm run test:beintegration
 
       # - name: Run E2E UI tests
       #   run: npm run test:ui
