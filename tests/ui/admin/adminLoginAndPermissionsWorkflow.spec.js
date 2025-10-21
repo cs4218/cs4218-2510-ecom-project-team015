@@ -43,7 +43,7 @@ test.describe("Admin Login and Permissions Workflow", () => {
 	}) => {
 		await page.goto("/");
 		await page.getByRole("link", { name: /login/i }).click();
-		await page.getByRole("textbox", { name: /enter your email/i }).fill("admin@gmail.com");
+		await page.getByRole("textbox", { name: /enter your email/i }).fill("cs4218Admin@test.com");
 		await page.getByRole("textbox", { name: /enter your password/i }).fill("WrongPass12345");
 		await page.getByRole("button", { name: /^login$/i }).click();
 

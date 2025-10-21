@@ -111,24 +111,6 @@ test.describe("Create Product Workflow", () => {
 		await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
 	});
 
-	test("shows a toast error when photo is greater than 1MB", async ({ page }) => {
-		await gotoCreateProduct(page);
-		await selectOrCreateCategoryOnCreateProduct(page, "Sample Category");
-
-		const name = `Sample ${Date.now()}`;
-		await page.getByRole("textbox", { name: /write a name/i }).fill(name);
-		await page.getByRole("textbox", { name: /write a description/i }).fill("Big image rejected");
-		await page.getByPlaceholder(/write a price/i).fill("12.00");
-		await page.getByPlaceholder(/write a quantity/i).fill("2");
-		await chooseShippingYes(page);
-
-		await uploadVirtualImage(page, { bytes: Math.ceil(1.2 * 1024 * 1024) });
-
-		await page.getByRole("button", { name: /create product/i }).click();
-		await expectToast(page, /(1\s*mb|1\s*mi?b|size|too large|exceeds)/i);
-		await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
-	});
-
 	test("check if photo less than 1MB is accepted", async ({ page }) => {
 		await gotoCreateProduct(page);
 		await selectOrCreateCategoryOnCreateProduct(page, "Sample Category");
@@ -145,5 +127,23 @@ test.describe("Create Product Workflow", () => {
 		await page.getByRole("button", { name: /create product/i }).click();
 		await expect(page).toHaveURL(/\/dashboard\/admin\/products/i);
 		await expect(page.getByRole("heading", { name })).toBeVisible();
+	});
+
+	test("shows a toast error when photo is greater than 1MB", async ({ page }) => {
+		await gotoCreateProduct(page);
+		await selectOrCreateCategoryOnCreateProduct(page, "Sample Category");
+
+		const name = `Sample ${Date.now()}`;
+		await page.getByRole("textbox", { name: /write a name/i }).fill(name);
+		await page.getByRole("textbox", { name: /write a description/i }).fill("Big image rejected");
+		await page.getByPlaceholder(/write a price/i).fill("12.00");
+		await page.getByPlaceholder(/write a quantity/i).fill("2");
+		await chooseShippingYes(page);
+
+		await uploadVirtualImage(page, { bytes: Math.ceil(1.2 * 1024 * 1024) });
+
+		await page.getByRole("button", { name: /create product/i }).click();
+		await expectToast(page, /(1\s*mb|1\s*mi?b|size|too large|exceeds)/i);
+		await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
 	});
 });
