@@ -30,8 +30,16 @@ jobs:
             npm install
             cd ..
 
-      - name: Run Frontend tests
+      - name: Run Frontend unit tests
         run: npm run test:frontend
 
-      - name: Run backend tests
+      - name: Run Backend unit tests
         run: npm run test:backend
+
+      - name: Run Frontend integration tests
+        run: npm run test:feintegration
+
+      - name: Run Backend integration tests
+        run: npm run test:beintegration
+
+      

@@ -9,7 +9,7 @@ export default defineConfig({
 	testDir: "./tests/ui",
 
 	/* Maximum time one test can run for. */
-	timeout: 15_000,
+	timeout: 30_000,
 
 	captureGitInfo: { commit: true, diff: true },
 

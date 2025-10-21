@@ -94,7 +94,7 @@ afterEach(() => {
 	jest.clearAllMocks();
 });
 
-describe("AdminOrders", () => {
+describe("Admin Orders", () => {
 	test("load all the orders in rows when auth token exists", async () => {
 		mockUseAuth = jest.fn().mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
 		axios.get.mockResolvedValueOnce({ data: orders });
