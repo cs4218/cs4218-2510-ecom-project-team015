@@ -8,6 +8,7 @@ import AdminOrders from "../../pages/admin/AdminOrders";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+
 jest.mock("../../components/Layout", () => ({
 	__esModule: true,
 	default: ({ children }) => <div data-testid="layout">{children}</div>,
@@ -37,13 +38,14 @@ jest.mock("antd", () => {
 			<select
 				aria-label={placeholder || "select"}
 				onChange={(e) => onChange(e.target.value)}
-				{...props}
-			>
+				{...props}>
 				{React.Children.map(children, (c) => c)}
 			</select>
 		);
 	};
-	Select.Option = ({ value, children }) => <option value={value}>{children}</option>;
+	Select.Option = ({ value, children }) => (
+		<option value={value}>{children}</option>
+	);
 	return { __esModule: true, Select };
 });
 
@@ -65,7 +67,9 @@ const orders = [
 		buyer: { name: "User1" },
 		createdAt: "2024-01-01T00:00:00.000Z",
 		payment: { success: true },
-		products: [{ _id: "p1", name: "Lamp", description: "Bright metal lamp", price: 10 }],
+		products: [
+			{ _id: "p1", name: "Lamp", description: "Bright metal lamp", price: 10 },
+		],
 	},
 	{
 		_id: "o2",
@@ -74,8 +78,18 @@ const orders = [
 		createdAt: "2024-01-02T00:00:00.000Z",
 		payment: { success: false },
 		products: [
-			{ _id: "p2", name: "Chair", description: "Wood chair lorem ipsum", price: 20 },
-			{ _id: "p3", name: "Desk", description: "Desk abcdefghijklmnop", price: 50 },
+			{
+				_id: "p2",
+				name: "Chair",
+				description: "Wood chair lorem ipsum",
+				price: 20,
+			},
+			{
+				_id: "p3",
+				name: "Desk",
+				description: "Desk abcdefghijklmnop",
+				price: 50,
+			},
 		],
 	},
 ];
@@ -96,14 +110,20 @@ afterEach(() => {
 
 describe("Admin Orders", () => {
 	test("load all the orders in rows when auth token exists", async () => {
-		mockUseAuth = jest.fn().mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
+		mockUseAuth = jest
+			.fn()
+			.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
 		axios.get.mockResolvedValueOnce({ data: orders });
 
 		renderPage();
 
-		await waitFor(() => expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/all-orders"));
+		await waitFor(() =>
+			expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/all-orders")
+		);
 
-		expect(await screen.findByRole("heading", { name: /all orders/i })).toBeInTheDocument();
+		expect(
+			await screen.findByRole("heading", { name: /all orders/i })
+		).toBeInTheDocument();
 		expect(screen.getByText("User1")).toBeInTheDocument();
 		expect(screen.getByText("User2")).toBeInTheDocument();
 
@@ -121,15 +141,18 @@ describe("Admin Orders", () => {
 	});
 
 	test("verify if changing order status calls PUT request and refetches all the orders", async () => {
-		mockUseAuth = jest.fn().mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
-		axios.get.mockResolvedValueOnce({ data: orders }).mockResolvedValueOnce({ data: orders });
+		mockUseAuth = jest
+			.fn()
+			.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
+		axios.get
+			.mockResolvedValueOnce({ data: orders })
+			.mockResolvedValueOnce({ data: orders });
 		axios.put.mockResolvedValueOnce({ data: { success: true } });
 
-		const user = userEvent.setup();
 		renderPage();
 
 		const selects = await screen.findAllByLabelText(/select/i);
-		await user.selectOptions(selects[1], "Shipped");
+		await userEvent.selectOptions(selects[1], "Shipped");
 
 		expect(axios.put).toHaveBeenCalledWith("/api/v1/auth/order-status/o2", {
 			status: "Shipped",
@@ -138,18 +161,21 @@ describe("Admin Orders", () => {
 	});
 
 	test("show a toast error when updating order status fails", async () => {
-		mockUseAuth = jest.fn().mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
+		mockUseAuth = jest
+			.fn()
+			.mockReturnValue([{ token: "t", user: { name: "Admin" } }]);
 		axios.get.mockResolvedValueOnce({ data: orders });
 		axios.put.mockRejectedValueOnce(new Error("boom"));
 
-		const user = userEvent.setup();
 		renderPage();
 
 		const selects = await screen.findAllByLabelText(/select/i);
-		await user.selectOptions(selects[0], "Shipped"); 
+		userEvent.selectOptions(selects[0], "Shipped");
 
 		await waitFor(() =>
-			expect(toast.error).toHaveBeenCalledWith("Something went wrong while updating order status")
+			expect(toast.error).toHaveBeenCalledWith(
+				"Something went wrong while updating order status"
+			)
 		);
 		expect(axios.get).toHaveBeenCalledTimes(1);
 	});
@@ -169,7 +195,9 @@ describe("Admin Orders", () => {
 		renderPage();
 
 		await waitFor(() =>
-			expect(toast.error).toHaveBeenCalledWith("Something went wrong while fetching orders")
+			expect(toast.error).toHaveBeenCalledWith(
+				"Something went wrong while fetching orders"
+			)
 		);
 	});
 });
