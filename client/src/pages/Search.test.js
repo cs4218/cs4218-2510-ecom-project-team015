@@ -35,8 +35,8 @@ describe("Search page (alt suite)", () => {
 
 		render(<Search />);
 
-		// Component has a typo: "Search Resuts"
-		expect(screen.getByText(/Search Resuts/i)).toBeInTheDocument();
+		// Check for the h1 heading "Search Results"
+		expect(screen.getByRole("heading", { level: 1, name: /Search Results/i })).toBeInTheDocument();
 		expect(screen.getByText(/No Products Found/i)).toBeInTheDocument();
 	});
 
