@@ -71,9 +71,10 @@ describe('End to End UI test flow: Homepage -> Register -> Forgot Password -> Lo
         await expect(page).toHaveURL(`${baseURL}/`);
 
         // Check that you are in home page and user name is displayed
-        await expect(page.getByText(/normal user/i)).toBeVisible();
+        await expect(page.getByText(/new user/i)).toBeVisible();
 
         // Click on the user name and logout
-
+        await page.getByRole('button', { name: 'new user' }).click();
+        await page.getByRole('link', { name: 'Logout' }).click();
     });
 });
