@@ -160,4 +160,104 @@ describe('Payment to Cart Integration Test', () => {
     const cartAfterClear = await cartModel.findOne({ user: testUser._id });
     expect(cartAfterClear.items).toHaveLength(0);
   });
+
+  test('payment failure leaves cart intact and creates no order', async () => {
+    // Force Braintree failure
+    mockSale.mockImplementation((options, callback) => {
+      callback(new Error('Payment declined'), null);
+    });
+
+    const paymentCart = testProducts.map(p => ({
+      _id: p._id.toString(),
+      name: p.name,
+      price: p.price,
+      description: p.description,
+    }));
+
+    const res = await request(app)
+      .post('/api/v1/product/braintree/payment')
+      .set('userid', testUser._id.toString())
+      .send({ nonce: 'fake-bad-nonce', cart: paymentCart });
+
+    expect(res.status).toBe(500);
+    expect(res.body.success).toBe(false);
+
+    // No order created
+    const orders = await orderModel.find({ buyer: testUser._id });
+    expect(orders).toHaveLength(0);
+
+    // Cart remains intact
+    const cart = await cartModel.findOne({ user: testUser._id });
+    expect(cart.items).toHaveLength(2);
+  });
+
+  test('missing nonce returns 400 and cart remains unchanged', async () => {
+    // Ensure mock does not interfere
+    mockSale.mockImplementation((options, callback) => {
+      callback(null, { success: true, id: 'should-not-be-called' });
+    });
+
+    const paymentCart = testProducts.map(p => ({
+      _id: p._id.toString(),
+      price: p.price,
+    }));
+
+    const res = await request(app)
+      .post('/api/v1/product/braintree/payment')
+      .set('userid', testUser._id.toString())
+      .send({ cart: paymentCart }); // no nonce
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/nonce required/i);
+
+    // No order created
+    const orders = await orderModel.find({ buyer: testUser._id });
+    expect(orders).toHaveLength(0);
+
+    // Cart remains
+    const cart = await cartModel.findOne({ user: testUser._id });
+    expect(cart.items).toHaveLength(2);
+  });
+
+  test('multi-user isolation: clearing one user cart does not affect another', async () => {
+    // Create second user and cart
+    const otherUser = await userModel.create({
+      name: 'Other User',
+      email: 'other@example.com',
+      password: 'hashed',
+      phone: '92345678',
+      address: '456 Test St',
+      answer: 'a',
+      DOB: '1991-02-02',
+    });
+    await cartModel.create({
+      user: otherUser._id,
+      items: [testProducts[0]._id],
+    });
+
+    // Successful payment for testUser
+    mockSale.mockImplementation((options, callback) => {
+      callback(null, { success: true, id: 'txn-multi-1' });
+    });
+    const paymentCart = testProducts.map(p => ({ _id: p._id.toString(), price: p.price }));
+    const pay = await request(app)
+      .post('/api/v1/product/braintree/payment')
+      .set('userid', testUser._id.toString())
+      .send({ nonce: 'ok', cart: paymentCart });
+    expect(pay.status).toBe(200);
+
+    // Clear only testUser cart
+    const clr = await request(app)
+      .delete('/api/v1/cart/clear')
+      .set('userid', testUser._id.toString());
+    expect(clr.status).toBe(200);
+
+    // testUser cart empty
+    const u1Cart = await cartModel.findOne({ user: testUser._id });
+    expect(u1Cart.items).toHaveLength(0);
+
+    // otherUser cart unchanged
+    const u2Cart = await cartModel.findOne({ user: otherUser._id });
+    expect(u2Cart.items).toHaveLength(1);
+  });
 });

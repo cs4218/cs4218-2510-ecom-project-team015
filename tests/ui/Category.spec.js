@@ -206,3 +206,55 @@ test("should prevent creating duplicate category (case-insensitive)", async ({ p
   // Verify the category appears without extra spaces
   await expect(page.getByRole("cell", { name: categoryName, exact: true })).toBeVisible();
 });
+
+test("should edit an existing category via modal and persist changes", async ({ page }) => {
+  await page.goto(`${baseURL}/dashboard/admin/create-category`);
+
+  // Create a unique category to edit
+  const categoryInput = page.getByPlaceholder(/enter new category/i);
+  const submitButton = page.getByRole("button", { name: /submit/i });
+  const originalName = `EditCat${Date.now()}`;
+  const updatedName = `${originalName}-Updated`;
+
+  await categoryInput.fill(originalName);
+  await submitButton.click();
+  await expect(page.getByText(new RegExp(`${originalName} is created`, "i"))).toBeVisible();
+  await expect(page.getByRole("cell", { name: originalName })).toBeVisible();
+
+  // Open edit modal for that row
+  const row = page.locator(`tr:has-text("${originalName}")`);
+  await row.getByRole("button", { name: /edit/i }).click();
+
+  // In modal, change name and submit
+  const modal = page.getByRole("dialog");
+  await expect(modal).toBeVisible();
+  await modal.getByPlaceholder(/enter new category/i).fill(updatedName);
+  await modal.getByRole("button", { name: /submit/i }).click();
+
+  // Expect success toast and table reflects updated name
+  await expect(page.getByText(new RegExp(`${updatedName} is updated`, "i"))).toBeVisible();
+  await expect(page.getByRole("cell", { name: updatedName })).toBeVisible();
+  await expect(page.getByRole("cell", { name: originalName, exact: true })).toHaveCount(0);
+});
+
+test("should delete a category and remove it from the list", async ({ page }) => {
+  await page.goto(`${baseURL}/dashboard/admin/create-category`);
+
+  // Create a unique category to delete
+  const categoryInput = page.getByPlaceholder(/enter new category/i);
+  const submitButton = page.getByRole("button", { name: /submit/i });
+  const deleteName = `DeleteCat${Date.now()}`;
+
+  await categoryInput.fill(deleteName);
+  await submitButton.click();
+  await expect(page.getByText(new RegExp(`${deleteName} is created`, "i"))).toBeVisible();
+  await expect(page.getByRole("cell", { name: deleteName })).toBeVisible();
+
+  // Click delete for that row
+  const row = page.locator(`tr:has-text("${deleteName}")`);
+  await row.getByRole("button", { name: /delete/i }).click();
+
+  // Expect deletion toast and row removed
+  await expect(page.getByText(/Category is deleted/i)).toBeVisible();
+  await expect(page.getByRole("cell", { name: deleteName })).toHaveCount(0);
+});
