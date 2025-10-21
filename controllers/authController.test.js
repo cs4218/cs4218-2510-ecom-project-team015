@@ -245,7 +245,7 @@ describe("loginController", () => {
 
         // Check it returns the correct status and message
         expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is not registerd" });
+        expect(res.send).toHaveBeenCalledWith({ success: false, message: "Email is not registered" });
     });
 
     it("should return error if password does not match", async () => {

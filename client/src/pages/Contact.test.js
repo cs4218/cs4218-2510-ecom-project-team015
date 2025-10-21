@@ -47,7 +47,7 @@ describe("Contact Page", () => {
     });
 
     it("should check whether the email is rendered with the icon", () => {
-        const email = screen.getByText(/: www.help@ecommerceapp.com/i);
+        const email = screen.getByText(/: help@ecommerceapp.com/i);
         const icon = screen.getByTestId("email-icon");
 
         // Check whether the email is correctly rendered with the icon
