@@ -34,7 +34,7 @@
 1. Add config files for integration tests
 2. Setup mongodb in-memory server for UI tests.
 
-
+Note: I have used ChatGPT to generate some mocks, tests and config files.
 
 ## 1. Project Introduction
 
