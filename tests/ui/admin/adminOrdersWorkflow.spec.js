@@ -49,7 +49,7 @@ test.describe("Admin Orders", () => {
 		const paymentCell = firstRow(page).locator("td").nth(4);
 		const qtyCell = firstRow(page).locator("td").nth(5);
 
-		await expect(buyerCell).toHaveText(/normal user/i);
+		await expect(buyerCell).toHaveText(/test user/i);
 		await expect(paymentCell).toHaveText(/success/i);
 		await expect(qtyCell).toHaveText(/^\s*2\s*$/);
 

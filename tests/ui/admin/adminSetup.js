@@ -57,14 +57,6 @@ export async function expectToast(page, textOrRegex, { timeout = 7000 } = {}) {
 }
 
 // Created using ChatGPT
-export async function typeAndBlur(locator, text) {
-	await locator.click();
-	await locator.fill(""); 
-	await locator.type(String(text)); 
-	await locator.press("Tab");
-}
-
-// Created using ChatGPT
 export async function openAntdDropdown(page, trigger) {
 	await trigger.scrollIntoViewIfNeeded();
 	await trigger.click();

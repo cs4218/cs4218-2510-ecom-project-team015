@@ -27,7 +27,7 @@ export const orderSeed = [
 			},
 			errors: { validationErrors: {}, errorCollections: {} },
 		},
-		buyer: "66db427fdb0119d9234c1001",
+		buyer: "66db427fdb0119d9234c1003",
 		status: "Not Processed",
 		createdAt: new Date("2024-09-20T11:00:00.000Z"),
 		updatedAt: new Date("2024-09-20T11:00:00.000Z"),

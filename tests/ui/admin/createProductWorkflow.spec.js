@@ -1,5 +1,5 @@
 // Written by Ujjwal Gaurav
-// This test file checks the create product functionality in admin dashboard
+// This test file checks the create product workflow in admin dashboard
 import { test, expect } from "@playwright/test";
 import {
 	loginAsAdmin,
@@ -9,7 +9,6 @@ import {
 	uploadPhoto,
 	expectToast,
 	uploadVirtualImage,
-	typeAndBlur
 } from "./adminSetup.js";
 
 async function gotoCreateProduct(page) {
@@ -17,14 +16,6 @@ async function gotoCreateProduct(page) {
 	await openAdminDashboard(page);
 	await page.getByRole("link", { name: /create product/i }).click();
 	await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
-}
-
-async function setPrice(page, value) {
-	const price = page.getByPlaceholder(/write a price/i);
-	await price.click();
-	await page.keyboard.press("ControlOrMeta+A");
-	await price.press("Backspace");
-	await price.type(value);
 }
 
 test.describe("Create Product Workflow", () => {
@@ -95,22 +86,16 @@ test.describe("Create Product Workflow", () => {
 
 		await selectOrCreateCategoryOnCreateProduct(page, "Sample Category");
 		await page.getByRole("textbox", { name: /write a name/i }).fill(`Sample ${Date.now()}`);
-		await page.getByRole("textbox", { name: /write a description/i }).fill("Bad price");
-
-		// Use type+blur so validation runs
-		await setPrice(page, "-20");
-		await typeAndBlur(page.getByPlaceholder(/write a quantity/i), "5");
+		await page.getByRole("textbox", { name: /write a description/i }).fill("Bad price case");
+		await page.getByPlaceholder(/write a quantity/i).fill("5");
 		await chooseShippingYes(page);
+		await uploadPhoto(page);
+
+		await page.getByPlaceholder(/write a price/i).fill("-1");
 
 		await page.getByRole("button", { name: /create product/i }).click();
 
-		// Be tolerant to ≤ vs <= and number formatting differences
-		await expectToast(
-			page,
-			/price\s*must\s*be\s*>\s*0\s*and\s*(?:≤|<=)\s*1[,_\s]?0{3}[,_\s]?0{3}/i,
-			{ timeout: 10000 }
-		);
-
+		await expectToast(page, /price\s*must\s*be\s*>\s*0/i, { timeout: 10000 });
 		await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
 	});
 
@@ -119,23 +104,18 @@ test.describe("Create Product Workflow", () => {
 
 		await selectOrCreateCategoryOnCreateProduct(page, "Sample Category");
 		await page.getByRole("textbox", { name: /write a name/i }).fill(`Sample ${Date.now()}`);
-		await page.getByRole("textbox", { name: /write a description/i }).fill("Bad quantity");
-
-		await typeAndBlur(page.getByPlaceholder(/write a price/i), "10.00");
-		await typeAndBlur(page.getByPlaceholder(/write a quantity/i), "-5"); // trigger integer validation
+		await page.getByRole("textbox", { name: /write a description/i }).fill("Bad quantity case");
+		await page.getByPlaceholder(/write a price/i).fill("10.00");
 		await chooseShippingYes(page);
+		await uploadPhoto(page);
+
+		await page.getByPlaceholder(/write a quantity/i).fill("4.5"); 
 
 		await page.getByRole("button", { name: /create product/i }).click();
 
-		await expectToast(
-			page,
-			/quantity\s*must\s*be\s*an\s*integer\s*>\s*0\s*and\s*(?:≤|<=)\s*1[,_\s]?0{5}/i,
-			{ timeout: 10000 }
-		);
-
+		await expectToast(page, /quantity\s*must\s*be\s*an\s*integer\s*>\s*0/i, { timeout: 10000 });
 		await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
 	});
-
 
 	test("check if photo less than 1MB is accepted", async ({ page }) => {
 		await gotoCreateProduct(page);

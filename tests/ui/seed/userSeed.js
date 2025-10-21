@@ -21,4 +21,15 @@ export const userSeed = [
 		DOB: "1999-12-12T00:00:00.000+00:00",
 		role: 1,
 	},
+	{
+		_id: "66db427fdb0119d9234c1003",
+		name: "Test User",
+		email: "cs4218TestUser@test.com",
+		password: "$2b$10$//wWsN./fEX1WiipH57HG.SAwgkYv1MRrPSkpXM38Dy5seOEhCoUy",
+		phone: "98765432",
+		address: "2 Computing Drive",
+		answer: "password is cs4218@test.com",
+		DOB: "2002-01-01T00:00:00.000+00:00",
+		role: 0,
+	},
 ];

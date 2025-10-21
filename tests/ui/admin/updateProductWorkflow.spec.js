@@ -1,4 +1,5 @@
-// tests/ui/admin/updateProductWorkflow.spec.js
+// Written by Ujjwal Gaurav
+// This test file checks the update product workflow in admin dashboard
 import { test, expect } from "@playwright/test";
 import {
 	loginAsAdmin,
@@ -6,10 +7,8 @@ import {
 	selectOrCreateCategoryOnCreateProduct,
 	chooseShippingYes,
 	uploadPhoto,
-	expectToast, // if you have it
+	expectToast,
 } from "./adminSetup.js";
-
-/* ---------- tiny local helpers ---------- */
 
 async function gotoProducts(page) {
 	await loginAsAdmin(page);
@@ -18,10 +17,10 @@ async function gotoProducts(page) {
 	await expect(page.getByRole("heading", { name: /all products list/i })).toBeVisible();
 }
 
-async function createSampleProduct(page, { name, price = "10", desc = "Sample Product" }) {
+// Created using ChatGPT
+async function createSampleProduct(page, { name, price = "10.00", desc = "Sample Product" }) {
 	await page.getByRole("link", { name: /create product/i }).click();
 	await expect(page.getByRole("heading", { name: /create product/i })).toBeVisible();
-
 	await selectOrCreateCategoryOnCreateProduct(page, "Sample Category");
 	await uploadPhoto(page);
 	await page.getByRole("textbox", { name: /write a name/i }).fill(name);
@@ -29,115 +28,122 @@ async function createSampleProduct(page, { name, price = "10", desc = "Sample Pr
 	await page.getByPlaceholder(/write a price/i).fill(price);
 	await page.getByPlaceholder(/write a quantity/i).fill("1");
 	await chooseShippingYes(page);
-
 	await page.getByRole("button", { name: /create product/i }).click();
 	await expect(page).toHaveURL(/\/dashboard\/admin\/products/i);
 	await expect(page.getByRole("heading", { name })).toBeVisible();
 }
 
-/** Open Update for product by exact title attribute; page through if needed */
-async function openUpdateForProduct(page, name) {
-	for (let i = 0; i < 10; i++) {
-		const card = page.locator(".card").filter({
-			has: page.locator(`h5.card-title[title="${name}"]`),
-		});
-		if (await card.count()) {
-			// Prefer a real link within the card if present; else fall back to Edit button.
-			const titleLink = card.getByRole("link").first();
-			if (await titleLink.count()) {
-				await titleLink.click();
-			} else {
-				await card.getByRole("button", { name: /edit/i }).first().click();
-			}
-			await expect(page.getByRole("heading", { name: /update product/i })).toBeVisible();
-			return;
-		}
-		// try next page if pagination exists
-		const next = page.getByRole("button", { name: /next|›/i }).first();
-		if (!(await next.count()) || !(await next.isEnabled())) break;
-		await next.click();
-	}
-	throw new Error(`Product "${name}" not found on Products grid.`);
+function cardFor(page, name) {
+	return page.locator(".card", { has: page.getByRole("heading", { name }) }).first();
 }
 
-/** Change price in a way that reliably fires onChange for number inputs */
+// Created using ChatGPT
+function slugify(s) {
+	return s
+		.toLowerCase()
+		.trim()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "");
+}
+
+// Created using ChatGPT
+async function openUpdate(page, name) {
+	const card = cardFor(page, name);
+	await expect(card).toBeVisible();
+	const link = card.getByRole("link").first();
+	if (await link.count()) await link.click();
+	else
+		await card
+			.getByRole("button", { name: /update|edit/i })
+			.first()
+			.click();
+	await expect(page.getByRole("heading", { name: /update product/i })).toBeVisible();
+}
+
+// Created using ChatGPT
 async function setPrice(page, value) {
 	const price = page.getByPlaceholder(/write a price/i);
-	await price.click();
-	await page.keyboard.press("ControlOrMeta+A");
-	await price.press("Backspace");
-	await price.type(value);
-	// blur to commit
+	await price.fill(String(value));
 	await page.getByRole("heading", { name: /update product/i }).click();
 }
 
-/* ------------------------ tests ------------------------ */
+// Created using ChatGPT
+async function reopenAndAssertPrice(page, name, expected) {
+	await page.getByRole("link", { name: /^products$/i }).click();
+	await expect(page).toHaveURL(/\/dashboard\/admin\/products/i);
+	await openUpdate(page, name);
+	const priceInput = page.getByPlaceholder(/write a price/i);
+	await expect.poll(() => priceInput.inputValue(), { timeout: 8000 }).toMatch(expected);
+}
 
-test.describe("Update Product Workflow (lean)", () => {
+test.describe("Update Product Workflow", () => {
 	test.setTimeout(30_000);
 
-	test("update price and verify it persisted", async ({ page }) => {
+	test("update price of a product and check if it is updated", async ({ page }) => {
 		await gotoProducts(page);
-
-		const name = `Update Product ${Date.now()}`;
-		await createSampleProduct(page, { name, price: "10", desc: "Update Product" });
-
-		// 1) Open Update
-		await openUpdateForProduct(page, name);
-
-		// 2) Change price and click UPDATE
-		await setPrice(page, "13.49");
-		await page.getByRole("button", { name: /update product/i }).click();
-
-		// Optional: if your UI shows a toast, this makes the wait deterministic
-		try {
-			await expectToast(page, /updated|success|saved/i, { timeout: 1500 });
-		} catch {}
-
-		// 3) Go back to Products grid explicitly
-		await page.getByRole("link", { name: /^products$/i }).click();
-		await expect(page).toHaveURL(/\/dashboard\/admin\/products/i);
-
-		// 4) Re-open the same product and assert the price input (source of truth)
-		await openUpdateForProduct(page, name);
-
-		// eventual assertion tolerates slow hydration
-		const priceInput = page.getByPlaceholder(/write a price/i);
-		await expect
-			.poll(async () => priceInput.inputValue(), {
-				timeout: 8000,
-				message: "price did not settle to updated value",
-			})
-			.toMatch(/13\.49|13\.5/);
-	});
-
-	test("bad price shows validation and stays on the Update form", async ({ page }) => {
-		await gotoProducts(page);
-
 		const name = `Update Product ${Date.now()}`;
 		await createSampleProduct(page, { name, price: "10.00", desc: "Update Product" });
-
-		await openUpdateForProduct(page, name);
-
-		await setPrice(page, "-10");
+		await openUpdate(page, name);
+		await setPrice(page, "13.49");
 		await page.getByRole("button", { name: /update product/i }).click();
+		await reopenAndAssertPrice(page, name, /13\.49|13\.5/);
+	});
 
-		await expectToast(page, /price|invalid|positive|greater than/i);
+	test("verify if updating to a bad price remains on Update Product form", async ({ page }) => {
+		await gotoProducts(page);
+		const name = `Update Product ${Date.now()}`;
+		await createSampleProduct(page, { name, price: "10.00", desc: "Update Product" });
+		await openUpdate(page, name);
+		await setPrice(page, "0");
+		await page.getByRole("button", { name: /update product/i }).click();
+		await expectToast(page, /price\s*must\s*be\s*>\s*0/i);
 		await expect(page.getByRole("heading", { name: /update product/i })).toBeVisible();
 	});
 
-	test("delete a product (confirm) removes it from grid", async ({ page }) => {
+	test("update quantity of a product and verify it is updated", async ({ page }) => {
 		await gotoProducts(page);
 
+		const name = `Update Product ${Date.now()}`;
+		await createSampleProduct(page, { name, price: "10.00", desc: "Qty Persist" });
+
+		await openUpdate(page, name);
+
+		const qty = page.getByPlaceholder(/write a quantity/i);
+		await qty.fill("2");
+		await page.getByRole("heading", { name: /update product/i }).click();
+		await page.getByRole("button", { name: /update product/i }).click();
+
+		await page.getByRole("link", { name: /^products$/i }).click();
+		await openUpdate(page, name);
+		await expect(page.getByPlaceholder(/write a quantity/i)).toHaveValue("2");
+	});
+
+	test("delete a product and verify if it is removed from product list", async ({ page }) => {
+		await gotoProducts(page);
 		const name = `Delete Product ${Date.now()}`;
 		await createSampleProduct(page, { name, price: "9.99", desc: "Delete Product" });
-
-		await openUpdateForProduct(page, name);
-
+		await openUpdate(page, name);
 		page.once("dialog", (d) => d.accept());
 		await page.getByRole("button", { name: /delete product/i }).click();
-
 		await expect(page).toHaveURL(/\/dashboard\/admin\/products/i);
-		await expect(page.getByRole("heading", { name })).toHaveCount(0);
+		await expect(cardFor(page, name)).toHaveCount(0);
+	});
+
+	test("verify if cancelling delete keeps the product in the product list", async ({ page }) => {
+		await gotoProducts(page);
+
+		const name = `Delete Cancel ${Date.now()}`;
+		await createSampleProduct(page, { name, price: "9.99", desc: "Cancel Delete" });
+
+		await openUpdate(page, name);
+
+		page.once("dialog", (d) => d.dismiss());
+		await page.getByRole("button", { name: /delete product/i }).click();
+
+		const expectedSlug = slugify(name);
+		await expect(page).toHaveURL(new RegExp(`/dashboard/admin/product/${expectedSlug}$`, "i"));
+
+		await page.getByRole("link", { name: /^products$/i }).click();
+		await expect(cardFor(page, name)).toBeVisible();
 	});
 });
