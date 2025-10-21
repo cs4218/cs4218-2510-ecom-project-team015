@@ -1,7 +1,6 @@
 // Author: Adhitya
 import { test, expect } from "@playwright/test";
 import { userSeed } from "../seed/userSeed";
-// e2e test which involves: register as new user -> log in as admin user -> navigate to dashboard/admin/users -> validate new user created
 
 // test.describe.configure({ mode: "parallel" });
 
