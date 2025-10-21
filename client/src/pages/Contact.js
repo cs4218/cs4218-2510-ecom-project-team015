@@ -20,7 +20,7 @@ const Contact = () => {
             available 24X7.  
           </p>
           <p className="mt-3">
-            <BiMailSend data-testid="email-icon"/> : www.help@ecommerceapp.com
+            <BiMailSend data-testid="email-icon"/> : help@ecommerceapp.com
           </p>
           <p className="mt-3">
             <BiPhoneCall data-testid="phone-icon"/> : 012-3456789
