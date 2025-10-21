@@ -57,5 +57,45 @@ describe("Validate response received from backend when user is admin and sends r
     test("does not throw error even if db is empty", async () => {
         const response = await request(testApp).get("/api/v1/auth/all-users");
         expect(response.statusCode).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body.length).toBe(0);
     });
+
+    test("returns error 500 if database call fails", async () => {
+        // Arrange
+        jest.spyOn(userModel, "find").mockImplementationOnce(() => {
+          throw new Error("Database failure");
+        });
+
+        // Act
+        const response = await request(testApp).get("/api/v1/auth/all-users");
+
+        // Assert
+        expect(response.statusCode).toBe(500);
+        expect(response.body.success).toBe(false);
+        expect(response.body.message).toBe("Error while fetching users");
+        expect(response.body.error).toBeDefined();
+
+        userModel.find.mockRestore();
+    });
+
+    // Generated with AI
+    test("handles malformed user data gracefully", async () => {
+      jest.spyOn(userModel, "find").mockResolvedValueOnce([{ name: null, email: 12345 }]);
+
+      const response = await request(testApp).get("/api/v1/auth/all-users");
+      expect(response.statusCode).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+
+      userModel.find.mockRestore();
+    });
+
+    test("returns 500 if database connection is lost", async () => {
+      await mongoose.disconnect(); // simulate failure
+      const response = await request(testApp).get("/api/v1/auth/all-users");
+
+      expect(response.statusCode).toBe(500);
+      await mongoose.connect(mongoServer.getUri());
+    });
+
 });
