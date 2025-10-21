@@ -3,10 +3,10 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import axios from "axios";
 import { MemoryRouter } from "react-router-dom";
-import App from "../../client/src/App";
-import { AuthProvider } from "../../client/src/context/auth";
-import { SearchProvider } from "../../client/src/context/search";
-import { CartProvider } from "../../client/src/context/cart";
+import App from "../App";
+import { AuthProvider } from "../context/auth";
+import { SearchProvider } from "../context/search";
+import { CartProvider } from "../context/cart";
 
 // Provide a virtual axios mock so components can import it
 jest.mock(
@@ -24,6 +24,8 @@ jest.mock(
 	{ virtual: true }
 );
 
+
+//Created with the help of ChatGPT
 const Providers = ({ children, initialEntries = ["/"] }) => (
 	<AuthProvider>
 		<SearchProvider>
@@ -121,7 +123,229 @@ describe("Integration: Login -> HomePage -> Search", () => {
 			expect(
 				screen.getByRole("heading", { level: 1, name: /Search Results/i })
 			).toBeInTheDocument();
+		});
+		expect(screen.getByText(/Found\s*2/i)).toBeInTheDocument();
+	});
+
+	it("logs in, searches with empty query", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText("John Doe")).toBeInTheDocument();
+		});
+
+		// Search with empty query
+		const searchBox = screen.getByRole("searchbox", { name: /search/i });
+		fireEvent.change(searchBox, { target: { value: "" } });
+		fireEvent.click(screen.getByRole("button", { name: /^Search$/i }));
+
+		// Should stay on homepage or handle empty search gracefully
+		expect(searchBox).toBeInTheDocument();
+	});
+
+	it("logs in, performs search, and views search results", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
+		});
+
+		// Search from header
+		const searchBox = screen.getByRole("searchbox", { name: /search/i });
+		fireEvent.change(searchBox, { target: { value: "phone" } });
+		fireEvent.click(screen.getByRole("button", { name: /^Search$/i }));
+
+		// Verify Search page and results
+		await waitFor(() => {
+			expect(
+				screen.getByRole("heading", { level: 1, name: /Search Results/i })
+			).toBeInTheDocument();
+		});
+
+		// Verify search results are displayed
+		await waitFor(() => {
 			expect(screen.getByText(/Found\s*2/i)).toBeInTheDocument();
 		});
+		expect(screen.getByText("Phone X")).toBeInTheDocument();
+		expect(screen.getByText("Phone Y")).toBeInTheDocument();
+	});
+
+	it("logs in with valid credentials and sees user dashboard", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		// Verify successful login and redirection
+		await waitFor(() => {
+			expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
+		});
+		expect(screen.getByText("John Doe")).toBeInTheDocument();
+
+		// Verify we're on the homepage - "All Products" is in h1
+		await waitFor(() => {
+			expect(screen.getByText(/All Products/i)).toBeInTheDocument();
+		});
+	});
+
+	it("fails login with incorrect credentials", async () => {
+		arrangeAxios({ loginOk: false });
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Try to login with invalid credentials
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "wrong@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "wrongpass" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		// Should stay on login page - verify login form still visible
+		await waitFor(() => {
+			expect(screen.getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
+			expect(screen.getByPlaceholderText("Enter Your Password")).toBeInTheDocument();
+		});
+	});
+
+	it("logs in and search input is functional", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText("John Doe")).toBeInTheDocument();
+		});
+
+		// Verify search box is present and functional
+		const searchBox = screen.getByRole("searchbox", { name: /search/i });
+		expect(searchBox).toBeInTheDocument();
+
+		// Type in search box
+		fireEvent.change(searchBox, { target: { value: "phone" } });
+		expect(searchBox).toHaveValue("phone");
+	});
+
+	it("logs in and header navigation links are visible", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText("John Doe")).toBeInTheDocument();
+		});
+
+		// Verify header navigation elements
+		expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
+		expect(screen.getByText(/Cart/i)).toBeInTheDocument();
+
+		// Verify user dropdown menu is present
+		const userDropdown = screen.getByText("John Doe");
+		expect(userDropdown).toBeInTheDocument();
+		expect(userDropdown).toHaveClass("dropdown-toggle");
+	});
+
+	it("displays cart badge with correct count", async () => {
+		arrangeAxios();
+
+		render(
+			<Providers initialEntries={["/login"]}>
+				<App />
+			</Providers>
+		);
+
+		// Login
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+			target: { value: "john@example.com" },
+		});
+		fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+			target: { value: "secret123" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /LOGIN/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText("John Doe")).toBeInTheDocument();
+		});
+
+		// Verify cart link exists
+		const cartLink = screen.getByText(/Cart/i);
+		expect(cartLink).toBeInTheDocument();
+
+		// Verify cart badge shows 0 initially
+		const cartBadge = screen.getByTitle("0");
+		expect(cartBadge).toHaveTextContent("0");
 	});
 });
