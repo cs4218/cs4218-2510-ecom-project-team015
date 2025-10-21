@@ -181,6 +181,7 @@ const HomePage = () => {
                     </button>
                     <button
                       className="btn btn-dark ms-1"
+                      data-testid={`add-to-cart-${p.slug}`}
                       onClick={() => {
                         if (cartActions?.addToCart) {
                           cartActions.addToCart(p);

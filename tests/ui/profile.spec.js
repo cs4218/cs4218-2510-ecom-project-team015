@@ -2,12 +2,22 @@ import { test, expect } from "@playwright/test";
 // import { connectTestDB, seedTestDB, disconnectTestDB, removeSeedDataDB } from "./seed/test-db-setup";
 test.describe.configure({mode: "parallel"});
 
+const ResetProfile = async (page) => {
+    await page.goto("/dashboard/user/profile");
 
-// test.beforeAll(async () => {
-//     //console.log(process.env.MONGO_TEST_URI);
-//     await request.post("/api/test/reset");
-// });
+    const nameInput = page.locator("#exampleNameInput");
+    const phoneInput = page.locator("#examplePhoneInput");
+    const addressInput = page.locator("#exampleAddressInput");
+    const pwdInput = page.getByPlaceholder("Enter Your Password")
+    const updateButton = page.locator("#updateButton");
 
+    // Act
+    await nameInput.fill("Normal User");
+    await phoneInput.fill("81234567");
+    await addressInput.fill("1 Computing Drive");
+    await pwdInput.fill("cs4218@test.com");
+    await updateButton.click();
+}
 test.beforeEach(async({page}) => {
     await page.goto("/login");
     const userNameInput = page.getByPlaceholder("Enter Your Email");
@@ -19,14 +29,15 @@ test.beforeEach(async({page}) => {
     await submitButton.click();
 });
 
+test.afterEach(async({page}) => {
+    await page.getByRole("button", { name: "Normal User" }).click();
+    await page.getByRole("link", { name: "Logout" }).click();
+})
 
 
 test("Check if profile page renders", async ({ page }) => {
     await page.goto("/dashboard/user/profile");
-
-    const profileHeader = page.getByText("USER PROFILE");
-
-    await expect(profileHeader).toBeVisible();
+    await expect(page.getByText("USER PROFILE")).toBeVisible();
 });
 
 test("Check if user data is populated correctly", async ({ page }) => {
@@ -63,6 +74,9 @@ test("Check if profile update form works", async ({ page }) => {
     await expect(nameInput).toHaveValue("Test User Updated");
     await expect(phoneInput).toHaveValue("98765432");
     await expect(addressInput).toHaveValue("New Address, Singapore");
+
+    //Reset Profile
+    await ResetProfile(page);
 });
 
 test("Check if password input updates", async ({ page }) => {
@@ -77,6 +91,9 @@ test("Check if password input updates", async ({ page }) => {
     
     // Assert
     await expect(page.getByText("Profile Updated Successfully")).toBeVisible();
+
+    //Reset Profile
+    await ResetProfile(page);
 });
 
 test("Check validation for invalid name", async ({ page }) => {
