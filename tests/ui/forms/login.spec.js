@@ -40,9 +40,8 @@ describe('UI tests for login page', () => {
 
         await loginButton.click();
 
-        // Check browser validation
         const { validity, validationMessage } = await emailField.evaluate(el => {
-            el.checkValidity(); // ensure validation runs
+            el.checkValidity();
             return {
             validity: {
                 valueMissing: el.validity.valueMissing,
@@ -65,9 +64,8 @@ describe('UI tests for login page', () => {
         await emailField.fill('test');
         await loginButton.click();
 
-        // Check browser validation
         const { validity, validationMessage } = await emailField.evaluate(el => {
-            el.checkValidity(); // ensure validation runs
+            el.checkValidity();
             return {
             validity: {
                 valueMissing: el.validity.valueMissing,
@@ -102,10 +100,33 @@ describe('UI tests for login page', () => {
         const loginButton = page.getByRole('button', { name: /login/i});
 
         await emailField.fill('cs4218@test.com')
-        await passwordField.fill('cs4218@test.com');
+        await passwordField.fill('wrongpass');
         await loginButton.click();
 
         await expect(page.getByText(/Invalid Password/i)).toBeVisible();
         await expect(page).toHaveURL(/\/login$/);
     });
+
+    test('should allow users with valid credentials to login successfully', async ({ page }) => {
+        const emailField = page.getByPlaceholder('Enter Your Email');
+        const passwordField = page.getByPlaceholder('Enter your Password');
+        const loginButton = page.getByRole('button', { name: /login/i});
+
+        await emailField.fill('cs4218@test.com')
+        await passwordField.fill('cs4218@test.com');
+        await loginButton.click();
+
+        await expect(page.getByText(/Login Successful/i)).toBeVisible();
+        await expect(page).toHaveURL(`${baseURL}/`);
+        await expect(page.getByText(/normal user/i)).toBeVisible();
+    });
+
+    test('should allow users to navigate to forgot password page', async ({ page }) => {
+        const forgotPasswordButton = page.getByRole('button', { name: /forgot password/i});
+
+        await forgotPasswordButton.click();
+
+        await expect(page).toHaveURL(/\/forgot-password$/);
+    });
+
 });
