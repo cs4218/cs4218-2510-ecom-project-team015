@@ -1,15 +1,16 @@
+// Author: Adhitya
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import userModel from "../../models/userModel";
-import testapp from "./updateProfileBackendSetup";
+import testApp from "./serverSetup";
 
 let mongoServer;
 let testUserId;
 let user;
 // Some of the tests have been written with help of AI
 const simulateFrontendRequest = async (updatedProfile) => {
-  return await request(testapp)
+  return await request(testApp)
     .put("/api/v1/auth/profile")
     .send(updatedProfile);
 };
@@ -57,7 +58,7 @@ describe("testing frontend interaction with updateProfileController and DB", () 
 
     const response = await simulateFrontendRequest(newUserData);
 
-    console.log("Response to frontend:", response.body);
+    // console.log("Response to frontend:", response.body);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.success).toBe(true);
@@ -75,7 +76,7 @@ describe("testing frontend interaction with updateProfileController and DB", () 
     };
     const response = await simulateFrontendRequest(newUserData);
 
-    console.log("Response to frontend:", response.body);
+    // console.log("Response to frontend:", response.body);
 
     expect(response.statusCode).toBe(400);
     expect(response.body.success).toBe(false);
@@ -93,7 +94,7 @@ describe("testing frontend interaction with updateProfileController and DB", () 
     };
     const response = await simulateFrontendRequest(newUserData);
 
-    console.log("Response to frontend:", response.body);
+    // console.log("Response to frontend:", response.body);
 
     expect(response.statusCode).toBe(400);
     expect(response.body.success).toBe(false);
@@ -111,7 +112,7 @@ describe("testing frontend interaction with updateProfileController and DB", () 
     };
     const response = await simulateFrontendRequest(newUserData);
 
-    console.log("Response to frontend:", response.body);
+    // console.log("Response to frontend:", response.body);
 
     expect(response.statusCode).toBe(400);
     expect(response.body.success).toBe(false);

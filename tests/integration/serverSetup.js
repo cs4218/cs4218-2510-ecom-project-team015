@@ -1,7 +1,8 @@
 // Lightweight server setup for integration tests
 import express from "express";
-import { registerController, loginController, forgotPasswordController } from "../../controllers/authController.js";
+import { registerController, loginController, forgotPasswordController, getAllUsersController } from "../../controllers/authController.js";
 import { requireSignIn, isAdmin } from "../../middlewares/authMiddleware.js";
+import { updateProfileController } from "../../controllers/authController.js";
 
 
 const testApp = express();
@@ -16,5 +17,15 @@ testApp.get("/user-auth", requireSignIn, (req, res) => {
 testApp.get("/admin-auth", requireSignIn, isAdmin, (req, res) => {
     res.status(200).send({ success: true, message: "Admin access granted", user: req.user });
 });
+
+testApp.put("/api/v1/auth/profile", (req, res, next) => {
+  req.user = { _id: req.body._id };
+  next();
+}, updateProfileController);
+
+testApp.get("/api/v1/auth/all-users", (req, res, next) => {
+  req.user = { _id: req.body._id};
+  next();
+}, getAllUsersController);
 
 export default testApp;

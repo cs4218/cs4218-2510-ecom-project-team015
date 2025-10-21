@@ -1,3 +1,4 @@
+// Author: Adhitya
 import { test, expect } from "@playwright/test";
 // Logs in -> Adds item to cart -> Place order -> Verify if order shows up on orders page
 // test.describe.configure({ mode: "parallel" });
