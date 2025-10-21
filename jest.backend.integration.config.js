@@ -6,7 +6,16 @@ export default {
   // all integration tests
   testMatch: ["<rootDir>/tests/integration/**/*.test.js"],
 
-  // optionally, add coverage thresholds if you want
-  // collectCoverage: true,
-  // collectCoverageFrom: ["tests/integration/**"],
+  // coverage from source files, not tests
+  collectCoverage: true,
+  coverageDirectory: "coverage/backend-integration",
+  collectCoverageFrom: [
+    "controllers/**",
+    "routes/**",
+    "middlewares/**",
+    "models/**",
+    "config/**",
+    "server.js",
+    "!**/*.test.js",
+  ],
 };

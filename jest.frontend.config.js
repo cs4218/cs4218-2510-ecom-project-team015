@@ -28,14 +28,15 @@ export default {
 	],
 
 	// Excluded as some bug fixes have broken the tests
-	testPathIgnorePatterns: [
-		"<rootDir>/client/src/context/cart.test.js",
-		"<rootDir>/client/src/pages/HomePage.test.js",
-		"<rootDir>/client/src/pages/CartPage.test.js",
-	],
+	// testPathIgnorePatterns: [
+	// 	"<rootDir>/client/src/context/cart.test.js",
+	// 	"<rootDir>/client/src/pages/HomePage.test.js",
+	// 	"<rootDir>/client/src/pages/CartPage.test.js",
+	// ],
 
 	// jest code coverage
 	collectCoverage: true,
+	coverageDirectory: "coverage/frontend",
 	collectCoverageFrom: [
 		"client/src/components/**/*.js",
 		"!client/src/components/Prices.js", // Excluded as it is not required
@@ -46,9 +47,6 @@ export default {
 		"!client/src/context/cart.js", // Excluded as some bug fixes have broken the tests
 		"!client/src/pages/CartPage.js", // Excluded as some bug fixes have broken the tests
 		"!client/src/pages/HomePage.js", // Excluded as it is not yet implemented
-		"!client/src/context/cart.test.js", // I know test file is not supposed to be here but testPathIgnorePatterns changes jest behaviour so need to add it here too.
-		"!client/src/pages/CartPage.test.js", 
-		"!client/src/pages/HomePage.test.js", 
 	],
 	coverageThreshold: {
 		global: {

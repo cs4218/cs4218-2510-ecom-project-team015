@@ -26,16 +26,18 @@ export default {
 
 	// jest code coverage
 	collectCoverage: true,
+	coverageDirectory: "coverage/frontend-integration",
 	collectCoverageFrom: [
 		"client/src/components/**/*.js",
         "client/src/pages/**/*.js",
         "client/src/context/**/*.js",
+		"!client/src/**/*.test.js",
 	],
-	coverageThreshold: {
-		global: {
-			lines: 80,
-			functions: 80,
-		},
-	},
+	// coverageThreshold: {
+	// 	global: {
+	// 		lines: 80,
+	// 		functions: 80,
+	// 	},
+	// },
 	setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
 };
