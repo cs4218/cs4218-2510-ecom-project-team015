@@ -72,6 +72,7 @@ test.describe('e2e testing for dashboard, usermenu and profile update', () => {
 
         //Reset Profile
         await ResetProfile(page);
+        await expect(page.getByText("Profile Updated Successfully")).toBeVisible();
     });
 });
 
