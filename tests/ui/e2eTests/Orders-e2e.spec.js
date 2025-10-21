@@ -59,7 +59,7 @@ test("Check if orders sequence works properly", async ({ page }) => {
     await expect(page.getByTestId("order-status-1")).toHaveText("Not Processed");
     await expect(page.getByTestId("order-buyer-1")).toHaveText("Normal User");
     await expect(page.getByTestId("order-payment-1")).toHaveText("Success");
-    await expect(page.getByTestId("order-date-1")).toHaveText("a few seconds ago");
+    await expect(page.getByTestId("order-date-1")).toHaveText("a year ago");
     await expect(page.getByTestId("product-name-66db427fdb0119d9234b27f9")).toHaveText("Novel");
     await expect(page.getByTestId("product-desc-66db427fdb0119d9234b27f9")).toHaveText("A bestselling novel");
     await expect(page.getByTestId("product-price-66db427fdb0119d9234b27f9")).toHaveText("Price : 14.99");

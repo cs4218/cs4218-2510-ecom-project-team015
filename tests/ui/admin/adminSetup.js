@@ -37,15 +37,34 @@ export async function loginAsUser(page, { email = "cs4218@test.com", password = 
 }
 
 // Created using ChatGPT
-export async function expectToast(page, regex) {
-	const alert = page.getByRole("alert");
-	if (await alert.count()) {
-		await expect(alert).toContainText(regex);
-	} else {
-		await expect(page.locator("body")).toContainText(regex);
-	}
+async function toastRoot(page) {
+	const portal = page.locator("#react-hot-toast");
+	return (await portal.count()) ? portal : page.locator("body");
 }
 
+// Created using ChatGPT
+async function toastLocator(page, textOrRegex) {
+	const root = await toastRoot(page);
+	return root.locator('[role="status"], [role="alert"]').filter({ hasText: textOrRegex }).last();
+}
+
+// Created using ChatGPT
+export async function expectToast(page, textOrRegex, { timeout = 7000 } = {}) {
+	const toast = await toastLocator(page, textOrRegex);
+	await toast.waitFor({ state: "visible", timeout });
+	await expect(toast).toBeVisible(); 
+	return toast; 
+}
+
+// Created using ChatGPT
+export async function typeAndBlur(locator, text) {
+	await locator.click();
+	await locator.fill(""); 
+	await locator.type(String(text)); 
+	await locator.press("Tab");
+}
+
+// Created using ChatGPT
 export async function openAntdDropdown(page, trigger) {
 	await trigger.scrollIntoViewIfNeeded();
 	await trigger.click();
