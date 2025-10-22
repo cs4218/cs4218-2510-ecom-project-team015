@@ -121,6 +121,8 @@ Note: I have used ChatGPT to generate some mocks, tests and config files.
 
 ### Miscellaneous
 1. Fixed a typo bug and make payment bug
+2. Created mock API utilities and context provider setups for tests
+
 Note: I used ChatGPT to create some visual reports and tests
 
 ## 1. Project Introduction
