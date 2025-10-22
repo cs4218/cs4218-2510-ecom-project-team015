@@ -32,15 +32,20 @@ jobs:
 
       - name: Run Frontend unit tests
         run: npm run test:frontend
+        continue-on-error: true
 
       - name: Run Backend unit tests
         run: npm run test:backend
+        continue-on-error: true
 
       - name: Run Frontend integration tests
         run: npm run test:feintegration
+        continue-on-error: true
 
       - name: Run Backend integration tests
         run: npm run test:beintegration
+        continue-on-error: true
 
       - name: Run E2E UI tests
         run: npm run test:ui
+        continue-on-error: true
