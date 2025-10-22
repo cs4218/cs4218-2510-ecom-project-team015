@@ -110,7 +110,6 @@ Note: I have used ChatGPT and Claude while writing tests and I have credited the
 Note: I have used ChatGPT to generate some mocks, tests and config files.
 
 ### Tran Anh Khoa
-
 #### Frontend Integration Tests
 1. loginHomeCart.integration.test.js  
 2. loginHomeFilter.integration.test.js  
