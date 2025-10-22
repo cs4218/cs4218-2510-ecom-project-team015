@@ -3,7 +3,7 @@ import { describe } from 'node:test';
 
 test.describe.configure({ mode: 'parallel' });
 
-describe('End to End UI test flow: Homepage -> Register -> Forgot Password -> Login -> Homepage -> Logout', () => {
+test.describe('End to End UI test flow: Homepage -> Register -> Forgot Password -> Login -> Homepage -> Logout', () => {
     const baseURL = 'http://localhost:3000';
 
     test.beforeEach(async ({ page }) => {

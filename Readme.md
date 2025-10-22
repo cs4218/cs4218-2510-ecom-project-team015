@@ -36,6 +36,31 @@
 
 Note: I have used ChatGPT to generate some mocks, tests and config files.
 
+## Ravi Kishore:
+### Frontend Integration Tests:
+1. register.integration.test.js
+2. login.integration.test.js
+3. forgotPassword.integration.test.js
+### Backend Integration Tests:
+1. registration.integration.test.js
+2. login.integration.test.js
+3. forgotPassword.integration.test.js
+4. middleware.integration.test.js
+5. End2End.integration.test.js
+### UI tests:
+1. forgotPassword.spec.js
+2. login.spec.js
+3. register.spec.js
+4. contact.spec.js
+5. policy.spec.js
+### E2E tests:
+1. registerForgotPasswordLoginHomeLogout.spec.js
+### Miscellaneous:
+1. Set up SonarQube scanner
+2. Written code coverage report
+
+Note: I have used ChatGPT to generate some mocks, tests and config files.
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.
