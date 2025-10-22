@@ -85,6 +85,29 @@ Note: I have used ChatGPT to generate some mocks, tests and config files.
 
 Note: I have used ChatGPT and Claude while writing tests and I have credited them at the top of each relevant file.
 
+## Ujjwal Gaurav:  
+### UI Tests (Playwright):  
+1. adminLoginAndPermissionsWorkflow.spec.js  
+2. adminOrdersWorkflow.spec.js  
+3. createProductWorkflow.spec.js  
+4. updateProductWorkflow.spec.js  
+*(Helper: adminSetup.js)*  
+
+### Integration Tests: 
+1. AdminDashboard.integration.test.js  
+2. AdminMenu.integration.test.js  
+3. AdminOrders.integration.test.js  
+4. Products.integration.test.js  
+5. CreateProduct.integration.test.js  
+6. UpdateProduct.integration.test.js  
+7. productController.integration.test.js  
+
+### Miscellaneous:
+1. Identified 4 bugs and fixed 2 during integration and UI testing.  
+2. Assisted in generating deterministic test data and improving Playwright reliability.  
+
+Note: I have used ChatGPT to generate some mocks, tests and config files.
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.
