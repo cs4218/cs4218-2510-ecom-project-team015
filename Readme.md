@@ -109,17 +109,17 @@ Note: I have used ChatGPT and Claude while writing tests and I have credited the
 
 Note: I have used ChatGPT to generate some mocks, tests and config files.
 
-### Tran Anh Khoa
-#### Frontend Integration Tests
+## Tran Anh Khoa
+### Frontend Integration Tests
 1. loginHomeCart.integration.test.js  
 2. loginHomeFilter.integration.test.js  
 3. loginHomeProductDetails.integration.test.js  
 4. loginHomeSearch.integration.test.js  
 
-#### UI Tests
+### UI Tests
 1. homepage.spec.js  
 
-#### Miscellaneous
+### Miscellaneous
 1. Fixed a typo bug and make payment bug
 Note: I used ChatGPT to create some visual reports and tests
 
