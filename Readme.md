@@ -37,6 +37,55 @@
 
 Note: I have used ChatGPT to generate some mocks, tests and config files.
 
+## Ravi Kishore:
+### Frontend Integration Tests:
+1. register.integration.test.js
+2. login.integration.test.js
+3. forgotPassword.integration.test.js
+### Backend Integration Tests:
+1. registration.integration.test.js
+2. login.integration.test.js
+3. forgotPassword.integration.test.js
+4. middleware.integration.test.js
+5. End2End.integration.test.js
+### UI tests:
+1. forgotPassword.spec.js
+2. login.spec.js
+3. register.spec.js
+4. contact.spec.js
+5. policy.spec.js
+### E2E tests:
+1. registerForgotPasswordLoginHomeLogout.spec.js
+### Miscellaneous:
+1. Set up SonarQube scanner
+2. Written code coverage report
+
+Note: I have used ChatGPT to generate some mocks, tests and config files.
+
+## Vedant Sinha
+### Integration Tests:
+1. cartpage-payment.integration.test.js
+2. e2e-cart-payment-order.integration.test.js
+3. payment-cartdb.integration.test.js
+4. payment-orderdb.integration.test.js
+5. categoryController.integration.test.js
+
+### UI Tests:
+1. Category.spec.js
+2. Footer.spec.js
+3. Header.spec.js
+4. Layout.spec.js
+5. Spinner.spec.js
+6. About.spec.js
+
+### Miscellaneous/Bug Fix: Added Cart database instead of just local storage:
+1. cartModel.js
+2. cartRoutes.js
+3. cartController.js
+4. Modified CartPage.js and context/cart.js
+
+Note: I have used ChatGPT and Claude while writing tests and I have credited them at the top of each relevant file.
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.
