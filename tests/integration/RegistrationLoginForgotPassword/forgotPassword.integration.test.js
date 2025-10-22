@@ -26,14 +26,11 @@ describe('Integration tests for Forgot Password feature', () => {
         await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
         // First, register a user to test the login feature
-
-
         const hashedPassword = await hashPassword(savedUser.password);
         await User.create({ ...savedUser, password: hashedPassword });
     });
 
     beforeEach(() => {
-        // 🕵️‍♂️ Spy on console.log
         consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {}); // prevent actual logs
     });
 

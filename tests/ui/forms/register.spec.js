@@ -1,9 +1,11 @@
+// Author: Ravi Kishore
+
 import { test, expect } from '@playwright/test';
 import { describe } from 'node:test';
 
 test.describe.configure({ mode: 'parallel' });
 
-describe('UI tests for Register Page', () => {
+test.describe('UI tests for Register Page', () => {
     const baseURL = 'http://localhost:3000';
 
     test.beforeEach(async ({ page }) => {
