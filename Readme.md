@@ -61,6 +61,29 @@ Note: I have used ChatGPT to generate some mocks, tests and config files.
 
 Note: I have used ChatGPT to generate some mocks, tests and config files.
 
+## Vedant Sinha
+### Integration Tests:
+1. cartpage-payment.integration.test.js
+2. e2e-cart-payment-order.integration.test.js
+3. payment-cartdb.integration.test.js
+4. payment-orderdb.integration.test.js
+5. categoryController.integration.test.js
+
+### UI Tests:
+1. Category.spec.js
+2. Footer.spec.js
+3. Header.spec.js
+4. Layout.spec.js
+5. Spinner.spec.js
+
+### Miscellaneous/Bug Fix: Added Cart database instead of just local storage:
+1. cartModel.js
+2. cartRoutes.js
+3. cartController.js
+4. Modified CartPage.js and context/cart.js
+
+Note: I have used ChatGPT and Claude while writing tests and I have credited them at the top of each relevant file.
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.
