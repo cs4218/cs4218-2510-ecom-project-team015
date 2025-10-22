@@ -3,6 +3,7 @@
 [![CI Status](https://img.shields.io/badge/CI-Link-brightgreen)](https://github.com/cs4218/cs4218-2510-ecom-project-team015/actions/runs/18257276719/job/51980387829)
 
 ## Project Contributions
+## Milestone 1
 | Name | Client Related Files (/client/src/) | Server Related Files (./) | Remarks |
 | :---- | :---- | :---- | :---- |
 | ADHITYA GOPALAKRISHNAN | <ul><li>Private.js</li><li>UserMenu.js</li><li>Dashboard.js</li><li>Orders.js</li><li>Profile.js</li><li>Users.js</li><li>HomePage.js <ul><li>getTotal</li><li>loadMore</li><li>handleFilter</li></ul></li><ul> | <ul><li>userModel.js</li><li>orderModel.js</li><li>controllers/authController.js<ul><li>updateProfileController</li><li>getOrdersController</li><li>getAllOrdersController</li><li>orderStatusController</li><li>getAllUsersController</li></ul></li></ul> | I have used ChatGPT for some of the mocks and to generate tests. I have specified it near the code where applicable. |
@@ -11,7 +12,29 @@
 | TRAN ANH KHOA | <ul><li>components/Form/SearchInput.js</li><li>context/search.js</li><li>pages/Search.js</li><li>pages/ProductDetails.js</li><li>pages/CategoryProduct.js</li><li>pages/HomePage.js</li></ul> | <ul><li>controllers/productController.js<ul><li>getProductController</li><li>getSingleProductController</li><li>productPhotoController</li><li>productFiltersController</li><li>productCountController</li><li>productListController</li><li>searchProductController</li><li>realtedProductController</li><li>productCategoryController</li></ul></li><li>models/productModel.js</li></ul> | I used ChatGPT to write many components for writing unit tests. I've mentioned the used of AI in the files I had ChatGPT for help.  |
 | UJJWAL GAURAV | <ul><li>AdminMenu.js</li><li>AdminDashboard.js</li><li>AdminOrders.js</li><li>Products.js</li><li>CategoryForm.js</li><li>CreateCategory.js</li><li>CreateProduct.js</li><li>UpdateProduct.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>createCategoryController</li><li>updateCategoryController</li><li>deleteCategoryController</li></ul><li>controllers/productController.js<ul><li>createProductController</li><li>updateProductController</li><li>deleteProductController</li></ul> | I used ChatGPT for some of the components for writing tests, stubs, and mocks. I’ve mentioned the use of ChatGPT in these components in a comment above each code written by AI.  |
 
+## Milestone 2
+## Adhitya Gopalakrishnan:
+### Frontend Integration Tests:
+1. userMenu.integration.test.js
+2. profile.integration.test.js
+3. dashboard.integration.test.js
+### Backend Integration Tests:
+1. adminUsers.integration.test.js
+2. orders.integration.test.js
+3. updateProfile.integration.test.js
+### UI tests:
+1. adminUsers.spec.js
+2. Dashboard.spec.js
+3. profile.spec.js
+4. UserMenu.spec.js
+### E2E tests:
+1. DashboardProfileUsermenu-e2e.spec.js
+2. Orders-e2e.spec.js
+### Miscellaneous:
+1. Add config files for integration tests
+2. Setup mongodb in-memory server for UI tests.
 
+Note: I have used ChatGPT to generate some mocks, tests and config files.
 
 ## 1. Project Introduction
 
