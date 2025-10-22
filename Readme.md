@@ -75,6 +75,7 @@ Note: I have used ChatGPT to generate some mocks, tests and config files.
 3. Header.spec.js
 4. Layout.spec.js
 5. Spinner.spec.js
+6. About.spec.js
 
 ### Miscellaneous/Bug Fix: Added Cart database instead of just local storage:
 1. cartModel.js
