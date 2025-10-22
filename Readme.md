@@ -27,6 +27,7 @@
 2. Dashboard.spec.js
 3. profile.spec.js
 4. UserMenu.spec.js
+5. Orders.spec.js
 ### E2E tests:
 1. DashboardProfileUsermenu-e2e.spec.js
 2. Orders-e2e.spec.js
