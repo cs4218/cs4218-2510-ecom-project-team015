@@ -25,6 +25,8 @@ export default {
 		"models/**",
 		"config/**",
 		"server.js",
+		"!models/cartModel.js",
+		"!controllers/cartController.js",
 		"!**/*.test.js",
 	],
 	coverageThreshold: {

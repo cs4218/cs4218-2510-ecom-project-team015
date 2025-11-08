@@ -43,10 +43,7 @@ export default {
 		"!client/src/components/Routes/AdminRoute.js", // Excluded as it is not required
 		"client/src/context/**/*.js",
 		"client/src/hooks/*.js",
-		"client/src/pages/**/*.js",
-		"!client/src/context/cart.js", // Excluded as some bug fixes have broken the tests
-		"!client/src/pages/CartPage.js", // Excluded as some bug fixes have broken the tests
-		"!client/src/pages/HomePage.js", // Excluded as it is not yet implemented
+		"client/src/pages/**/*.js",	
 	],
 	coverageThreshold: {
 		global: {

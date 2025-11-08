@@ -1,9 +1,9 @@
-// Tests for categoryControlller and singleCategoryController are written with the help of Claude.
+// Tests for categoryController and singleCategoryController are written with the help of Claude.
 import {
 	createCategoryController,
 	updateCategoryController,
 	deleteCategoryController,
-	categoryControlller,
+	categoryController,
 	singleCategoryController,
 } from "./categoryController.js";
 
@@ -260,7 +260,7 @@ describe("categoryController Component", () => {
 		});
 	});
 
-	describe("categoryControlller", () => {
+	describe("categoryController", () => {
 	
 		it("sends status 200 and returns all categories when categories exist", async () => {
 			const mockCategories = [
@@ -272,7 +272,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			expect(find).toHaveBeenCalledTimes(1);
 			expect(find).toHaveBeenCalledWith({});
@@ -290,7 +290,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			expect(find).toHaveBeenCalledTimes(1);
 			expect(find).toHaveBeenCalledWith({});
@@ -309,7 +309,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			expect(find).toHaveBeenCalledTimes(1);
 			expect(find).toHaveBeenCalledWith({});
@@ -330,7 +330,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			expect(res.status).toHaveBeenCalledWith(500);
 			expect(logSpy).toHaveBeenCalledWith(unexpectedError);
@@ -344,7 +344,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			expect(find).toHaveBeenCalledWith({});
 			expect(find).not.toHaveBeenCalledWith(null);
@@ -360,7 +360,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			expect(res.status).toHaveBeenCalledWith(200);
 			expect(res.send).toHaveBeenCalledWith({
@@ -378,7 +378,7 @@ describe("categoryController Component", () => {
 			const req = {};
 			const res = makeRes();
 
-			await categoryControlller(req, res);
+			await categoryController(req, res);
 
 			const returnedCategories = res.send.mock.calls[0][0].category;
 			expect(returnedCategories).toBe(mockCategories);
