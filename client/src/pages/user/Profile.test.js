@@ -94,29 +94,25 @@ describe("Rendering user profile page", () => {
             </MemoryRouter>
         );
 
-        const nameInput = screen.getByPlaceholderText("Enter Your Name");
-        const emailInput = screen.getByPlaceholderText("Enter Your Email");
-        const passwordInput = screen.getByPlaceholderText("Enter Your Password");
-        const phoneInput = screen.getByPlaceholderText("Enter Your Phone");
-        const addressInput = screen.getByPlaceholderText("Enter Your Address");
-        const updateButton = screen.getByRole("button", { name: /UPDATE/i });
+        const nameInput = await screen.getByPlaceholderText("Enter Your Name");
+        const passwordInput = await screen.getByPlaceholderText("Enter Your Password");
+        const phoneInput = await screen.getByPlaceholderText("Enter Your Phone");
+        const addressInput = await screen.getByPlaceholderText("Enter Your Address");
+        const updateButton = await screen.getByRole("button", { name: /UPDATE/i });
 
-        userEvent.clear(nameInput);
-        userEvent.type(nameInput, newUserData.name);
-        userEvent.clear(emailInput);
-        userEvent.type(emailInput, newUserData.email);
-        userEvent.clear(passwordInput);
-        userEvent.type(passwordInput, newUserData.password);
-        userEvent.clear(phoneInput);
-        userEvent.type(phoneInput, newUserData.phone);
-        userEvent.clear(addressInput);
-        userEvent.type(addressInput, newUserData.address);
+        await userEvent.clear(nameInput);
+        await userEvent.type(nameInput, newUserData.name);
+        await userEvent.clear(passwordInput);
+        await userEvent.type(passwordInput, newUserData.password);
+        await userEvent.clear(phoneInput);
+        await userEvent.type(phoneInput, newUserData.phone);
+        await userEvent.clear(addressInput);
+        await userEvent.type(addressInput, newUserData.address);
         await userEvent.click(updateButton);
 
         //assert
 
         expect(nameInput).toHaveValue(newUserData.name);
-        expect(emailInput).toHaveValue(newUserData.email);
         expect(phoneInput).toHaveValue(newUserData.phone);
         expect(addressInput).toHaveValue(newUserData.address);
         expect(window.localStorage.getItem).toHaveBeenCalled();

@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Search from "./Search";
 
 // Mock the useSearch hook so we can inject state per test
@@ -18,6 +19,11 @@ jest.mock("./../components/Layout", () => ({
 	),
 }));
 
+// Mock cart context using ChatGPT
+jest.mock("../context/cart", () => ({
+  useCart: jest.fn(() => [[], jest.fn(), { addToCart: jest.fn() }]),
+}));
+
 const { useSearch } = jest.requireMock("../context/search");
 
 // (optional) mute irrelevant warnings (like missing key in map)
@@ -33,7 +39,11 @@ describe("Search page (alt suite)", () => {
 	it("when there are no results: show title and message 'No Products Found'", () => {
 		useSearch.mockReturnValue([{ keyword: "", results: [] }, jest.fn()]);
 
-		render(<Search />);
+		render(
+			<MemoryRouter>
+			<Search />
+			</MemoryRouter>
+		);
 
 		// Check for the h1 heading "Search Results"
 		expect(screen.getByRole("heading", { level: 1, name: /Search Results/i })).toBeInTheDocument();
@@ -48,7 +58,11 @@ describe("Search page (alt suite)", () => {
 		];
 		useSearch.mockReturnValue([{ keyword: "phone", results: data }, jest.fn()]);
 
-		const { container } = render(<Search />);
+		const { container } = render(
+			<MemoryRouter>
+			<Search />
+			</MemoryRouter>
+		);
 
 		// Shows 'Found 3'
 		expect(screen.getByText(/Found\s*3/i)).toBeInTheDocument();
@@ -92,7 +106,11 @@ describe("Search page (alt suite)", () => {
 		const short = [{ _id: "s1", name: "Tiny", description: "abc", price: 10 }];
 		useSearch.mockReturnValue([{ keyword: "t", results: short }, jest.fn()]);
 
-		render(<Search />);
+		render(
+			<MemoryRouter>
+			<Search />
+			</MemoryRouter>
+		);
 
 		const tiny = screen.getByRole("heading", { level: 5, name: "Tiny" });
 		const tinyCard = tiny.closest(".card");
