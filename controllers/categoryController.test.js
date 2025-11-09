@@ -6,6 +6,7 @@ import {
 	categoryController,
 	singleCategoryController,
 } from "./categoryController.js";
+import productModel from "../models/productModel.js";
 
 jest.mock("slugify", () => ({
 	__esModule: true,
@@ -13,10 +14,14 @@ jest.mock("slugify", () => ({
 }));
 
 // Mock Created using ChatGPT
+jest.mock("../models/productModel.js");
+const { updateMany } = productModel;
+
 jest.mock("../models/categoryModel.js", () => {
 	const save = jest.fn();
 	const findOne = jest.fn();
 	const find = jest.fn();
+	const findById = jest.fn();
 	const findByIdAndUpdate = jest.fn();
 	const findByIdAndDelete = jest.fn();
 
@@ -27,19 +32,20 @@ jest.mock("../models/categoryModel.js", () => {
 
 	MockModel.findOne = findOne;
 	MockModel.find = find;
+	MockModel.findById = findById;
 	MockModel.findByIdAndUpdate = findByIdAndUpdate;
 	MockModel.findByIdAndDelete = findByIdAndDelete;
 
 	return {
 		__esModule: true,
 		default: MockModel,
-		__mockFns: { save, findOne, find, findByIdAndUpdate, findByIdAndDelete },
+		__mockFns: { save, findOne, find, findById, findByIdAndUpdate, findByIdAndDelete },
 	};
 });
 
 // Created using ChatGPT
 import { __mockFns } from "../models/categoryModel.js";
-const { save, findOne, find, findByIdAndUpdate, findByIdAndDelete } = __mockFns;
+const { save, findOne, find, findById, findByIdAndUpdate, findByIdAndDelete } = __mockFns;
 
 // Created using ChatGPT
 const makeRes = () => ({
@@ -227,6 +233,12 @@ describe("categoryController Component", () => {
 	// DELETE CATEGORY
 	describe("deleteCategoryController", () => {
 		it("sends status 200 on successful deletion", async () => {
+			findById.mockResolvedValue({ _id: "1", slug: "books" });
+
+			findOne.mockResolvedValue({ _id: "999", slug: "uncategorized" });
+
+			updateMany.mockResolvedValue({ modifiedCount: 2 });
+
 			findByIdAndDelete.mockResolvedValue({ _id: "1", name: "Books" });
 
 			const req = { params: { id: "1" } };
@@ -237,13 +249,16 @@ describe("categoryController Component", () => {
 			expect(findByIdAndDelete).toHaveBeenCalledWith("1");
 			expect(res.status).toHaveBeenCalledWith(200);
 			expect(res.send).toHaveBeenCalledWith({
-				success: true,
-				message: "Category Deleted Successfully",
+			success: true,
+			message: "Category Deleted Successfully",
 			});
 			expect(res.end).not.toHaveBeenCalled();
 		});
 
 		it("sends status 500 if an unexpected error happens", async () => {
+			findById.mockResolvedValue({ _id: "1", slug: "books" });
+			findOne.mockResolvedValue({ _id: "999", slug: "uncategorized" });
+			updateMany.mockResolvedValue({});
 			findByIdAndDelete.mockRejectedValue(new Error("network down"));
 
 			const req = { params: { id: "1" } };

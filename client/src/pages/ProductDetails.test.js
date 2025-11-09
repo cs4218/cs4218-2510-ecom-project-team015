@@ -35,6 +35,11 @@ jest.mock("./../components/Layout", () => ({
 	),
 }));
 
+// Mock cart context using ChatGPT
+jest.mock("../context/cart", () => ({
+  useCart: jest.fn(() => [[], jest.fn(), { addToCart: jest.fn() }]),
+}));
+
 
 // Silence console.error for warning noises (optional) using ChatGPT
 let consoleErrorSpy;

@@ -1,4 +1,5 @@
 import categoryModel from "../models/categoryModel.js";
+import productModel from "../models/productModel.js"
 import slugify from "slugify";
 
 export const createCategoryController = async (req, res) => {
@@ -147,6 +148,28 @@ export const singleCategoryController = async (req, res) => {
 export const deleteCategoryController = async (req, res) => {
 	try {
 		const { id } = req.params;
+
+		const category = await categoryModel.findById(id);
+		if (category.slug === "uncategorized") {
+			return res.status(400).send({
+				success: false,
+				message: "Default 'Uncategorized' category cannot be deleted",
+			});
+		}
+		
+		let defaultCategory = await categoryModel.findOne({ slug: "uncategorized" });
+		if (!defaultCategory) {
+			defaultCategory = await categoryModel.create({
+				name: "Uncategorized",
+				slug: slugify("Uncategorized"),
+			});
+		}
+
+		await productModel.updateMany(
+			{ category: id },
+			{ $set: { category: defaultCategory._id } }
+    	);
+
 		await categoryModel.findByIdAndDelete(id);
 		res.status(200).send({
 			success: true,
