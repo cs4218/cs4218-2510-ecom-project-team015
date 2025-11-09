@@ -1,6 +1,12 @@
 // These test cases have been written with the help of Claude.
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
+
+// Mock auth context so CartProvider sees a guest user (no token)
+jest.mock('./auth', () => ({
+  useAuth: () => [{ user: null, token: null }, jest.fn()],
+}));
+
 import { CartProvider, useCart } from './cart';
 
 const localStorageMock = (() => {
@@ -82,13 +88,17 @@ describe('CartProvider', () => {
     });
 
     it('should handle invalid JSON in localStorage gracefully', () => {
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
       localStorageMock.getItem.mockReturnValue('invalid-json{');
 
-      expect(() => {
-        renderHook(() => useCart(), {
-          wrapper: CartProvider,
-        });
-      }).toThrow();
+      const { result } = renderHook(() => useCart(), {
+        wrapper: CartProvider,
+      });
+
+      // initial state remains [] and error is logged, no throw
+      expect(result.current[0]).toEqual([]);
+      expect(logSpy).toHaveBeenCalled();
+      logSpy.mockRestore();
     });
   });
 
@@ -178,14 +188,20 @@ describe('CartProvider', () => {
       consoleError.mockRestore();
     });
 
-    it('should return cart and setCart function when used inside provider', () => {
+    it('should return cart, setCart, and actions when used inside provider', () => {
       const { result } = renderHook(() => useCart(), {
         wrapper: CartProvider,
       });
 
-      expect(result.current).toHaveLength(2);
+      expect(result.current).toHaveLength(3);
       expect(Array.isArray(result.current[0])).toBe(true);
       expect(typeof result.current[1]).toBe('function');
+      expect(result.current[2]).toBeTruthy();
+      expect(typeof result.current[2]).toBe('object');
+      expect(typeof result.current[2].addToCart).toBe('function');
+      expect(typeof result.current[2].removeFromCart).toBe('function');
+      expect(typeof result.current[2].clearCart).toBe('function');
+      expect(typeof result.current[2].mergeCart).toBe('function');
     });
   });
 

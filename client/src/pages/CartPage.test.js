@@ -39,6 +39,29 @@ const renderWithRouter = (component) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
+// Helper to provide cart actions that mirror production behavior for tests
+const makeCartActions = (cart, setCart) => ({
+  removeFromCart: (index) => {
+    const updated = [...cart];
+    updated.splice(index, 1);
+    setCart(updated);
+    try {
+      localStorage.setItem('cart', JSON.stringify(updated));
+    } catch (e) {
+      // CartPage logs errors; keep parity
+      console.log(e);
+    }
+  },
+  clearCart: async () => {
+    setCart([]);
+    try {
+      localStorage.removeItem('cart');
+    } catch (e) {
+      console.log(e);
+    }
+  },
+});
+
 describe('CartPage Component', () => {
   let mockNavigate;
   let mockSetCart;
@@ -226,7 +249,7 @@ describe('CartPage Component', () => {
         { _id: '2', name: 'Product 2', price: 200, description: 'Test 2' }
       ];
       useAuth.mockReturnValue([{ user: null, token: null }, mockSetAuth]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       renderWithRouter(<CartPage />);
       const removeButtons = screen.getAllByText('Remove');
@@ -243,7 +266,7 @@ describe('CartPage Component', () => {
         { _id: '1', name: 'Product 1', price: 100, description: 'Test 1' }
       ];
       useAuth.mockReturnValue([{ user: null, token: null }, mockSetAuth]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
       const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
 
       renderWithRouter(<CartPage />);
@@ -261,7 +284,7 @@ describe('CartPage Component', () => {
         { _id: '3', name: 'Product 3', price: 300, description: 'Test 3' }
       ];
       useAuth.mockReturnValue([{ user: null, token: null }, mockSetAuth]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       renderWithRouter(<CartPage />);
       const removeButtons = screen.getAllByText('Remove');
@@ -281,7 +304,7 @@ describe('CartPage Component', () => {
         { _id: '1', name: 'Product 1', price: 100, description: 'Test 1' }
       ];
       useAuth.mockReturnValue([{ user: null, token: null }, mockSetAuth]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new Error('localStorage error');
@@ -477,7 +500,7 @@ describe('CartPage Component', () => {
         { user: { name: 'John', address: '123 Main' }, token: 'valid-token' },
         mockSetAuth
       ]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       renderWithRouter(<CartPage />);
 
@@ -513,7 +536,7 @@ describe('CartPage Component', () => {
         { user: { name: 'John', address: '123 Main' }, token: 'valid-token' },
         mockSetAuth
       ]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
 
@@ -546,7 +569,7 @@ describe('CartPage Component', () => {
         { user: { name: 'John', address: '123 Main' }, token: 'valid-token' },
         mockSetAuth
       ]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       renderWithRouter(<CartPage />);
 
@@ -579,7 +602,7 @@ describe('CartPage Component', () => {
         { user: { name: 'John', address: null }, token: 'valid-token' },
         mockSetAuth
       ]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       renderWithRouter(<CartPage />);
 
@@ -603,7 +626,7 @@ describe('CartPage Component', () => {
         { user: { name: 'John', address: '123 Main' }, token: 'valid-token' },
         mockSetAuth
       ]);
-      useCart.mockReturnValue([mockCart, mockSetCart]);
+      useCart.mockReturnValue([mockCart, mockSetCart, makeCartActions(mockCart, mockSetCart)]);
 
       renderWithRouter(<CartPage />);
 
