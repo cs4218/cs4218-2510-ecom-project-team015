@@ -18,7 +18,10 @@
 		"test:ui": "playwright test",
 		"ctest": "playwright test --project=chromium",
 		"ftest": "playwright test --project=firefox",
-		"wtest": "playwright test --project=webkit"
+		"wtest": "playwright test --project=webkit",
+		"load:smoke": "k6 run --summary-export tests/load-testing/smoke-summary.json tests/load-testing/load.smoke.js",
+		"load:normal": "k6 run --summary-export tests/load-testing/normal-summary.json tests/load-testing/load.normal.js",
+		"load:peak": "k6 run --summary-export tests/load-testing/peak-summary.json tests/load-testing/load.peak.js"
 	},
 	"keywords": [],
 	"author": "RP",
