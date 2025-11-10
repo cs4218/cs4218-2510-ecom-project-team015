@@ -106,7 +106,7 @@ const CreateProduct = () => {
 			if (data?.success) {
 				// Bug Fix: Corrected the logic to show success toast only on successful creation
 				toast.success("Product Created Successfully");
-				navigate("/dashboard/admin/products");
+				setTimeout(() => navigate("/dashboard/admin/products"), 70);
 			} else {
 				toast.error(data?.message || "Create failed");
 			}
